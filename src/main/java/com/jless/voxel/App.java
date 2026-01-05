@@ -15,6 +15,7 @@ import org.joml.Matrix4f;
 
 
 public class App {
+  public Controller c;
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
   private Matrix4f modelMatrix;
@@ -26,12 +27,18 @@ public class App {
 
   public static int vSync = 1;
   public static float FOV = 70.0f;
+  private double lastMouseX, lastMouseY;
+  private boolean firstMouse = true;
 
   private void run() {
 
     waylandCheck();
     initWindow();
     initGL();
+
+    setupMouse();
+    processInput();
+
     loop();
     cleanup();
   }
@@ -127,6 +134,47 @@ public class App {
   private void cleanup() {
     glfwDestroyWindow(window);
     glfwTerminate();
+  }
+
+  private void processInput() {
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+      c.moveF();
+    }
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+      c.moveB();
+    }
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+      c.moveL();
+    }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+      c.moveR();
+    }
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+      c.moveU();
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+      c.moveD();
+    }
+  }
+
+  private void setupMouse() {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetCursorPosCallback(window, (window, xpos, ypos) -> {
+      if(firstMouse) {
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+        firstMouse = true;
+      }
+
+      float dx = (float)(xpos - lastMouseX);
+      float dy = (float)(lastMouseY - ypos);
+
+      lastMouseX = xpos;
+      lastMouseY = ypos;
+
+      Controller.processMouse(dx, dy);
+    });
   }
 
   private void waylandCheck() {

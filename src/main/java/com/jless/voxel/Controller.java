@@ -13,7 +13,7 @@ public class Controller {
   private static float roll;
 
   private float moveSpeed = 0.1f;
-  private float mouseSens = 0.15f;
+  private static float mouseSens = 0.15f;
 
   public Controller(float x, float y, float z) {
     Controller.position = new Vector3f(x, y, z);
@@ -38,7 +38,7 @@ public class Controller {
   }
 
   //mouse movement
-  public void processMouse(float dx, float dy) {
+  public static void processMouse(float dx, float dy) {
     yaw += (float)Math.toRadians(dx * mouseSens);
     pitch += (float)Math.toRadians(dy * mouseSens);
 
