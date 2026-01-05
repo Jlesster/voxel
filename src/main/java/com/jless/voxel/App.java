@@ -37,19 +37,30 @@ public class App {
     initGL();
 
     setupMouse();
-    processInput();
 
     loop();
     cleanup();
   }
 
   private void loop() {
+    Chunk chunk = new Chunk(0, 0, 0);
     while(!glfwWindowShouldClose(window)) {
+      processInput();
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
+
+      FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
+      lightPos.put(new float[] {
+        0.5f, 1.0f, 0.3f, 0.0f //dir light
+      }).flip();
+
+      glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+      chunk.render();
+
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -97,17 +108,33 @@ public class App {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    //lighting stuff
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
+    glClearColor(0.5f, 0.7f, 1.0f, 0.8f);
 
     projMatrix = new Matrix4f();
     viewMatrix = new Matrix4f();
     modelMatrix = new Matrix4f();
     matrixBuffer = BufferUtils.createFloatBuffer(16);
 
+    FloatBuffer lightColor = BufferUtils.createFloatBuffer(4);
+    lightColor.put(new float[] {
+      1.0f, 1.0f, 1.0f, 1.0f
+    }).flip();
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+
     updateProjectionMatrix(wWidth, wHeight);
+
+    c = new Controller(8, 8, 30);
 
     glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
       glViewport(0, 0, width, height);
@@ -125,7 +152,7 @@ public class App {
   private void updateProjectionMatrix(int width, int height) {
     projMatrix = new Matrix4f().perspective(
       (float)Math.toRadians(FOV),     //fov in radians
-      (float)wWidth / wHeight,            //aspect ratio
+      (float)width / height,            //aspect ratio
       0.1f,                               //near plane
       1000.0f                             //far plane
     );
@@ -164,11 +191,11 @@ public class App {
       if(firstMouse) {
         lastMouseX = xpos;
         lastMouseY = ypos;
-        firstMouse = true;
+        firstMouse = false;
       }
 
       float dx = (float)(xpos - lastMouseX);
-      float dy = (float)(lastMouseY - ypos);
+      float dy = (float)(ypos - lastMouseY);
 
       lastMouseX = xpos;
       lastMouseY = ypos;

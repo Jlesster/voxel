@@ -43,25 +43,43 @@ public class Controller {
     pitch += (float)Math.toRadians(dy * mouseSens);
 
     if(pitch > Math.toRadians(89.0f)) pitch = (float)Math.toRadians(89.0f);
-    if(pitch < Math.toRadians(89.0f)) pitch = (float)Math.toRadians(89.0f);
+    if(pitch < Math.toRadians(-89.0f)) pitch = (float)Math.toRadians(-89.0f);
+  }
+
+  private Vector3f getForward() {
+    Vector3f forward = new Vector3f();
+    float p = -pitch;
+
+    forward.x = (float)(Math.cos(p) * Math.sin(yaw));
+    forward.y = (float)(Math.sin(p));
+    forward.z = (float)(-Math.cos(p) * Math.cos(yaw));
+
+    return forward.normalize();
+  }
+
+  private Vector3f getRight() {
+    Vector3f f = getForward();
+    Vector3f up = new Vector3f(0, 1, 0);
+
+    return f.cross(up, new Vector3f()).normalize();
   }
 
   public void moveF() {
-    position.x += (float)Math.sin(yaw) * moveSpeed;
-    position.z -= (float)Math.cos(yaw) * moveSpeed;
+    Vector3f f = getForward();
+    position.add(f.mul(moveSpeed));
   }
   public void moveB() {
-    position.x -= (float)Math.sin(yaw) * moveSpeed;
-    position.z += (float)Math.cos(yaw) * moveSpeed;
+    Vector3f b = getForward();
+    position.sub(b.mul(moveSpeed));
   }
 
   public void moveL() {
-    position.x += (float)Math.sin(yaw - Math.PI / 2) * moveSpeed;
-    position.y -= (float)Math.sin(yaw - Math.PI / 2) * moveSpeed;
+    Vector3f l = getRight();
+    position.sub(l.mul(moveSpeed));
   }
   public void moveR() {
-    position.x -= (float)Math.sin(yaw - Math.PI / 2) * moveSpeed;
-    position.y += (float)Math.sin(yaw - Math.PI / 2) * moveSpeed;
+    Vector3f r = getRight();
+    position.add(r.mul(moveSpeed));
   }
 
   public void moveU() {position.y += moveSpeed;}
