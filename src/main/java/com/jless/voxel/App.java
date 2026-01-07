@@ -15,11 +15,14 @@ import org.joml.Matrix4f;
 
 
 public class App {
+  UI ui;
+
   public Controller c;
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
   private Matrix4f modelMatrix;
   private FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+
 
   public static long window;
   public static int wWidth = 800;
@@ -31,10 +34,13 @@ public class App {
   private boolean firstMouse = true;
 
   private void run() {
+    ui = new UI(this);
 
     waylandCheck();
     initWindow();
     initGL();
+
+    ui.initGui(window);
 
     setupMouse();
 
@@ -44,6 +50,8 @@ public class App {
 
   private void loop() {
     Chunk chunk = new Chunk(0, 0, 0);
+    World world = new World();
+    world.generateFlat(4);
     while(!glfwWindowShouldClose(window)) {
       processInput();
 
@@ -59,7 +67,8 @@ public class App {
 
       glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-      chunk.render();
+      world.render();
+      ui.guiFrameRender();
 
 
       glfwSwapBuffers(window);
@@ -89,9 +98,27 @@ public class App {
     window = glfwCreateWindow(wWidth, wHeight, "Voxel beta", 0, 0);
     if(window == 0) throw new RuntimeException("Err init window");
 
+    glfwSetWindowFocusCallback(window, (win, focused) -> {
+      if(!focused) {
+        glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        firstMouse = true;
+      }
+    });
+
+    glfwSetMouseButtonCallback(window, (win, button, action, mods) -> {
+      if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      }
+    });
+
     glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
       if(key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
         glfwSetWindowShouldClose(window, true);
+      }
+
+      if(key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        firstMouse = true;
       }
     });
   }
@@ -185,13 +212,13 @@ public class App {
   }
 
   private void setupMouse() {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetCursorPosCallback(window, (window, xpos, ypos) -> {
       if(firstMouse) {
         lastMouseX = xpos;
         lastMouseY = ypos;
         firstMouse = false;
+        return;
       }
 
       float dx = (float)(xpos - lastMouseX);

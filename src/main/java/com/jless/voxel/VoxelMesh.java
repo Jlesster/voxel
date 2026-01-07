@@ -12,7 +12,7 @@ public class VoxelMesh {
   private int vertexCount;
 
   public VoxelMesh(float[] vertices) {
-    this.vertexCount = vertices.length / 6;
+    this.vertexCount = vertices.length / 10;
 
     vboID = glGenBuffers();
     glBindBuffer(GL_ARRAY_BUFFER, vboID);
@@ -28,18 +28,21 @@ public class VoxelMesh {
   public void render() {
     glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
-    int stride = 6 * Float.BYTES;
+    int stride = 10 * Float.BYTES;
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 
     glVertexPointer(3, GL_FLOAT, stride, 0);
     glNormalPointer(GL_FLOAT, stride, 3 * Float.BYTES);
+    glColorPointer(3, GL_FLOAT, stride, 6 * Float.BYTES);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-    glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
