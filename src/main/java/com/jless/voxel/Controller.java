@@ -12,7 +12,7 @@ public class Controller {
   private static float yaw;
   private static float roll;
 
-  private float moveSpeed = 0.1f;
+  private float moveSpeed = 0.5f;
   private static float mouseSens = 0.15f;
 
   public Controller(float x, float y, float z) {

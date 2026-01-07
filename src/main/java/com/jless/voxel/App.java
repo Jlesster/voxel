@@ -51,7 +51,7 @@ public class App {
   private void loop() {
     Chunk chunk = new Chunk(0, 0, 0);
     World world = new World();
-    world.generateFlat(4);
+    world.generateTerra(32);
     while(!glfwWindowShouldClose(window)) {
       processInput();
 
@@ -69,7 +69,6 @@ public class App {
 
       world.render();
       ui.guiFrameRender();
-
 
       glfwSwapBuffers(window);
       glfwPollEvents();

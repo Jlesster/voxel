@@ -23,7 +23,7 @@ public class Chunk {
   private static final int FACE_BOTTOM = 5;
 
   //size of the rendered chunk cubed
-  public static final int CHUNK_SIZE = 32;
+  public static final int CHUNK_SIZE = 16;
 
   //storing block data in memory as bytes
   private byte[][][] blocks = new byte[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
@@ -35,19 +35,16 @@ public class Chunk {
     this.chunkX = chunkX;
     this.chunkY = chunkY;
     this.chunkZ = chunkZ;
-    generateBlocks();
-    generateMesh();
   }
 
-  private void generateMesh() {
+  public void generateMesh(World w) {
     List<Float> vertices = new ArrayList<>();
 
     for(int x = 0; x < CHUNK_SIZE; x++) {
       for(int y = 0; y < CHUNK_SIZE; y++) {
         for(int z = 0; z < CHUNK_SIZE; z++) {
           if(isVoxelSolid(x, y, z)) {
-            addVisibleFaces(vertices, x, y, z, blocks[x][y][z]); //face culling in this
-            // addCube(vertices, x, y, z); //this is for a big fucky block with no face culling
+            addVisibleFaces(vertices, x, y, z, blocks[x][y][z], w);
           }
         }
       }
@@ -59,13 +56,22 @@ public class Chunk {
     mesh = new VoxelMesh(vertArray);
   }
 
-  private void generateBlocks() {
+  public void generateBlocks(TerrainGenerator gen) {
     for(int x = 0; x < CHUNK_SIZE; x++) {
-      for(int y = 0; y < CHUNK_SIZE; y++) {
-        for(int z = 0; z < CHUNK_SIZE; z++) {
-          if(y == CHUNK_SIZE - 1) {
+      for(int z = 0; z < CHUNK_SIZE; z++) {
+
+        int wx = chunkX * CHUNK_SIZE + x;
+        int wz = chunkZ * CHUNK_SIZE + z;
+        int height = gen.getHeight(wx, wz);
+
+        for(int y = 0; y < CHUNK_SIZE; y++) {
+          int wy = chunkY * CHUNK_SIZE + y;
+
+          if(wy > height) {
+            blocks[x][y][z] = AIR;
+          } else if(wy == height) {
             blocks[x][y][z] = GRASS;
-          } else if(y > CHUNK_SIZE - 4) {
+          } else if(wy > height - 3) {
             blocks[x][y][z] = DIRT;
           } else {
             blocks[x][y][z] = STONE;
@@ -86,6 +92,12 @@ public class Chunk {
     glPopMatrix();
   }
 
+  public boolean isLocalBlockSolid(int x, int y, int z) {
+    if(x < 0 || y < 0 || z < 0) return false;
+    if(x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) return false;
+    return blocks[x][y][z] != AIR;
+  }
+
   public Vector3f getCenter() {
     return new Vector3f(
       chunkX * CHUNK_SIZE + CHUNK_SIZE / 2.0f,
@@ -94,6 +106,7 @@ public class Chunk {
     );
   }
 
+  //colors for the byte map
   private float[] getBlockColor(byte blockID, int face) {
     switch(blockID) {
       case GRASS:
@@ -118,57 +131,42 @@ public class Chunk {
     return blocks[x][y][z] != AIR;
   }
 
-  private void addVisibleFaces(List<Float> v, int x, int y, int z, byte blockID) {
-    if(!isVoxelSolid(x, y, z + 1)) {
+  private void addVisibleFaces(List<Float> v, int x, int y, int z, byte blockID, World w) {
+    int wx = chunkX * CHUNK_SIZE + x;
+    int wy = chunkY * CHUNK_SIZE + y;
+    int wz = chunkZ * CHUNK_SIZE + z;
+
+    if(!w.isBlockSolid(wx, wy, wz + 1)) {
       float[] c = getBlockColor(blockID, FACE_FRONT);
       addQuad(v, 0, 0, 1, x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1, x, y + 1, z + 1, c[0], c[1], c[2], c[3]);
     }
 
-    if(!isVoxelSolid(x, y, z - 1)) {
+    if(!w.isBlockSolid(wx, wy, wz - 1)) {
       float[] c = getBlockColor(blockID, FACE_BACK);
       addQuad(v, 0, 0, -1, x + 1, y, z, x, y, z, x, y + 1, z, x + 1, y + 1, z, c[0], c[1], c[2], c[3]);
     }
 
-    if(!isVoxelSolid(x - 1, y, z)) {
+    if(!w.isBlockSolid(wx - 1, wy, wz)) {
       float[] c = getBlockColor(blockID, FACE_RIGHT);
       addQuad(v, -1, 0, 0, x, y, z, x, y, z + 1, x, y + 1, z + 1, x, y + 1, z, c[0], c[1], c[2], c[3]);
     }
 
-    if(!isVoxelSolid(x + 1, y, z)) {
+    if(!w.isBlockSolid(wx + 1, wy, wz)) {
       float[] c = getBlockColor(blockID, FACE_LEFT);
       addQuad(v, 1, 0, 0, x + 1, y, z + 1, x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1, c[0], c[1], c[2], c[3]);
     }
 
-    if(!isVoxelSolid(x, y + 1, z)) {
+    if(!w.isBlockSolid(wx, wy + 1, wz)) {
       float[] c = getBlockColor(blockID, FACE_TOP);
       addQuad(v, 0, 1, 0, x, y + 1, z + 1, x + 1, y + 1, z + 1, x + 1, y + 1, z, x, y + 1, z, c[0], c[1], c[2], c[3]);
     }
 
-    if(!isVoxelSolid(x, y - 1, z)) {
+    if(!w.isBlockSolid(wx, wy - 1, wz)) {
       float[] c = getBlockColor(blockID, FACE_BOTTOM);
       addQuad(v, 0, -1, 0, x, y, z, x + 1, y, z, x + 1, y, z + 1, x, y, z + 1, c[0], c[1], c[2], c[3]);
     }
   }
 
-  private void addCube(List<Float> v, float x, float y, float z) {
-    //front
-    addQuad(v, 0, 0, 1, x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1, x, y + 1, z + 1, 0, 1, 1, 0.6f);
-
-    //back
-    addQuad(v, 0, 0, -1, x + 1, y, z, x, y, z, x, y + 1, z, x + 1, y + 1, z, 1, 0, 1, 0.6f);
-
-    //left
-    addQuad(v, -1, 0, 0, x, y, z, x, y, z + 1, x, y + 1, z + 1, x, y + 1, z, 1, 1, 0, 0.6f);
-
-    //right
-    addQuad(v, 1, 0, 0, x + 1, y, z + 1, x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1, 0, 0, 1, 0.6f);
-
-    //top
-    addQuad(v, 0, 1, 0, x, y + 1, z + 1, x + 1, y + 1, z + 1, x + 1, y + 1, z, x, y + 1, z, 0, 1, 0, 0.6f);
-
-    //bottom
-    addQuad(v, 0, -1, 0, x, y, z, x + 1, y, z, x + 1, y, z + 1, x, y, z + 1, 1, 0, 0, 0.6f);
-  }
 
   //creates one square per call
   private void addQuad(List<Float> v,
