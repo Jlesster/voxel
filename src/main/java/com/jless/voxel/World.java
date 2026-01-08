@@ -14,6 +14,9 @@ public class World {
   }
 
   public boolean isBlockSolid(int wx, int wy, int wz) {
+    int worldMaxHeight = Chunk.WORLD_HEIGHT_BLOCKS;
+    if(wy < 0 || wy >= worldMaxHeight) return false;
+
     int chunkX = floorDiv(wx, Chunk.CHUNK_SIZE);
     int chunkY = floorDiv(wy, Chunk.CHUNK_SIZE);
     int chunkZ = floorDiv(wz, Chunk.CHUNK_SIZE);
@@ -29,14 +32,23 @@ public class World {
   }
 
   public void generateTerra(int radius) {
-    TerrainGenerator gen = new SimpleNoiseGen();
-    for(int x = -radius; x <= radius; x++) {
-      for(int z = -radius; z <= radius; z++) {
-        Chunk c = new Chunk(x, 0, z);
-        c.generateBlocks(gen);
-        chunks.put(chunkKey(x, 0, z), c);
+    TerrainGenerator gen = new PerlinTerraGen();
+    int worldMaxHeight = Chunk.WORLD_HEIGHT_BLOCKS;
+    int chunksY = worldMaxHeight / Chunk.CHUNK_SIZE;
+
+    for(int cx = -radius; cx <= radius; cx++) {
+      for(int cz = -radius; cz <= radius; cz++) {
+        for(int cy = 0; cy < chunksY; cy++) {
+          Chunk c = new Chunk(cx, cy, cz);
+          chunks.put(chunkKey(cx, cy, cz), c);
+        }
       }
     }
+
+    for(Chunk c : chunks.values()) {
+      c.generateFromDensity(gen);
+    }
+
     for(Chunk c : chunks.values()) {
       c.generateMesh(this);
     }

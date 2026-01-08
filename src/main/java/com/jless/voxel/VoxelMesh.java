@@ -36,7 +36,7 @@ public class VoxelMesh {
 
     glVertexPointer(3, GL_FLOAT, stride, 0);
     glNormalPointer(GL_FLOAT, stride, 3 * Float.BYTES);
-    glColorPointer(3, GL_FLOAT, stride, 6 * Float.BYTES);
+    glColorPointer(4, GL_FLOAT, stride, 6 * Float.BYTES);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 

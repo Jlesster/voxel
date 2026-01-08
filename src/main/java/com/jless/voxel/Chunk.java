@@ -23,7 +23,8 @@ public class Chunk {
   private static final int FACE_BOTTOM = 5;
 
   //size of the rendered chunk cubed
-  public static final int CHUNK_SIZE = 16;
+  public static final int CHUNK_SIZE =  8;
+  public static final int WORLD_HEIGHT_BLOCKS = 64;
 
   //storing block data in memory as bytes
   private byte[][][] blocks = new byte[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
@@ -39,16 +40,31 @@ public class Chunk {
 
   public void generateMesh(World w) {
     List<Float> vertices = new ArrayList<>();
+    int topFacesSkipped = 0;
+    int topFacesAdded = 0;
 
     for(int x = 0; x < CHUNK_SIZE; x++) {
       for(int y = 0; y < CHUNK_SIZE; y++) {
         for(int z = 0; z < CHUNK_SIZE; z++) {
           if(isVoxelSolid(x, y, z)) {
+            int wx = chunkX * CHUNK_SIZE + x;
+            int wy = chunkY * CHUNK_SIZE + y;
+            int wz = chunkZ * CHUNK_SIZE + z;
+
+            if(!w.isBlockSolid(wx, wy + 1, wz)) {
+              topFacesAdded++;
+            } else {
+              topFacesSkipped++;
+            }
             addVisibleFaces(vertices, x, y, z, blocks[x][y][z], w);
           }
         }
       }
     }
+    if(chunkX == 0 && chunkY == 0 && chunkZ == 0) {
+      System.out.println("Chunk (0,0,0): Top faces added=" + topFacesAdded + ", top faces skipped=" + topFacesSkipped);
+    }
+
     float[] vertArray = new float [vertices.size()];
     for(int i = 0; i < vertices.size(); i++) {
       vertArray[i] = vertices.get(i);
@@ -56,26 +72,17 @@ public class Chunk {
     mesh = new VoxelMesh(vertArray);
   }
 
-  public void generateBlocks(TerrainGenerator gen) {
+  public void generateFromDensity(TerrainGenerator gen) {
     for(int x = 0; x < CHUNK_SIZE; x++) {
-      for(int z = 0; z < CHUNK_SIZE; z++) {
-
-        int wx = chunkX * CHUNK_SIZE + x;
-        int wz = chunkZ * CHUNK_SIZE + z;
-        int height = gen.getHeight(wx, wz);
-
-        for(int y = 0; y < CHUNK_SIZE; y++) {
+      for(int y =0; y < CHUNK_SIZE; y++) {
+        for(int z = 0; z < CHUNK_SIZE; z++) {
+          int wx = chunkX * CHUNK_SIZE + x;
           int wy = chunkY * CHUNK_SIZE + y;
+          int wz = chunkZ * CHUNK_SIZE + z;
 
-          if(wy > height) {
-            blocks[x][y][z] = AIR;
-          } else if(wy == height) {
-            blocks[x][y][z] = GRASS;
-          } else if(wy > height - 3) {
-            blocks[x][y][z] = DIRT;
-          } else {
-            blocks[x][y][z] = STONE;
-          }
+          float d = gen.density(wx, wy, wz);
+
+          blocks[x][y][z] = (d> 0) ? STONE : AIR;
         }
       }
     }
@@ -131,6 +138,19 @@ public class Chunk {
     return blocks[x][y][z] != AIR;
   }
 
+  public boolean hasBlocks() {
+    for(int x = 0; x < CHUNK_SIZE; x++) {
+      for(int y = 0; y < CHUNK_SIZE; y++) {
+        for(int z = 0; z < CHUNK_SIZE; z++) {
+          if(blocks[x][y][z] != AIR) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   private void addVisibleFaces(List<Float> v, int x, int y, int z, byte blockID, World w) {
     int wx = chunkX * CHUNK_SIZE + x;
     int wy = chunkY * CHUNK_SIZE + y;
@@ -147,12 +167,12 @@ public class Chunk {
     }
 
     if(!w.isBlockSolid(wx - 1, wy, wz)) {
-      float[] c = getBlockColor(blockID, FACE_RIGHT);
+      float[] c = getBlockColor(blockID, FACE_LEFT);
       addQuad(v, -1, 0, 0, x, y, z, x, y, z + 1, x, y + 1, z + 1, x, y + 1, z, c[0], c[1], c[2], c[3]);
     }
 
     if(!w.isBlockSolid(wx + 1, wy, wz)) {
-      float[] c = getBlockColor(blockID, FACE_LEFT);
+      float[] c = getBlockColor(blockID, FACE_RIGHT);
       addQuad(v, 1, 0, 0, x + 1, y, z + 1, x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1, c[0], c[1], c[2], c[3]);
     }
 

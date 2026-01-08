@@ -1,5 +1,5 @@
 package com.jless.voxel;
 
 public interface TerrainGenerator {
-  int getHeight(int wx, int wz);
+  float density(int wx, int wy, int wz);
 }
