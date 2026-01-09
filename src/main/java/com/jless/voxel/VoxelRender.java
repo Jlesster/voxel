@@ -6,12 +6,8 @@ public class VoxelRender {
 
   public static void render(World world) {
     for(Chunk chunk : world.getLoadedChunks()) {
-      for(VoxelFace f : chunk.getMesh(world)) {
-        float[] c = Blocks.COLOR[f.blockID];
-        glColor3f(c[0], c[1], c[2]);
-
-        drawFace(f.x, f.y, f.z, f.face);
-      }
+      chunk.ensureUploaded(world);
+      chunk.drawVBO();
     }
   }
 
