@@ -19,6 +19,7 @@ public class App {
   private UI ui;
   private World world;
   public Controller c;
+  private RaycastHit currHit = null;
 
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
@@ -69,15 +70,67 @@ public class App {
 
       glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
+      currHit = VoxelRaycast.raycast(
+        world,
+        c.getEyePos(),
+        c.getForward(),
+        6.0f
+      );
 
       blockManip();
       VoxelRender.render(world);
+      if(currHit != null) {
+        drawOutline(currHit.block);
+      }
+
       drawCrosshair();
       ui.renderGUI();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
     }
+  }
+
+  private void drawOutline(Vector3i block) {
+    float x = block.x;
+    float y = block.y;
+    float z = block.z;
+
+    float eps = 0.002f;
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
+    glLineWidth(2.0f);
+
+    glColor3f(0f, 0f, 0f);
+
+    glBegin(GL_LINES);
+
+    line(x - eps, y - eps, z - eps, x + 1 + eps, y - eps, z - eps);
+    line(x + 1 + eps, y - eps, z - eps, x + 1 + eps, y - eps, z + 1 + eps);
+    line(x + 1 + eps, y - eps, z + 1 + eps, x - eps, y - eps, z + 1 + eps);
+    line(x - eps, y - eps, z + 1 + eps, x - eps, y - eps, z - eps);
+
+    line(x - eps, y + 1 + eps, z - eps, x + 1 + eps, y + 1 + eps, z - eps);
+    line(x + 1 + eps, y + 1 + eps, z - eps, x + 1 + eps, y + 1 + eps, z + 1 + eps);
+    line(x + 1 + eps, y + 1 + eps, z + 1 + eps, x - eps, y + 1 + eps, z + 1 + eps);
+    line(x - eps, y + 1 + eps, z + 1 + eps, x - eps, y + 1 + eps, z - eps);
+
+    line(x - eps, y - eps, z - eps, x - eps, y + 1 + eps, z - eps);
+    line(x + 1 + eps, y - eps, z - eps, x + 1 + eps, y + 1 + eps, z - eps);
+    line(x + 1 + eps, y - eps, z + 1 + eps, x + 1 + eps, y + 1 + eps, z + 1 + eps);
+    line(x - eps, y + 1 + eps, z + 1 + eps, x - eps, y + 1 + eps, z - eps);
+
+    glEnd();
+    glEnable(GL_CULL_FACE);
+  }
+
+  private void line(
+    float x1, float y1, float z1,
+    float x2, float y2, float z2
+  ) {
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x2, y2, z2);
   }
 
   private void loadMatrix(Matrix4f matrix, int mode) {
@@ -204,7 +257,7 @@ public class App {
       RaycastHit hit = VoxelRaycast.raycast(world,
         c.getEyePos(),
         c.getForward(),
-        60.0f
+        6.0f
       );
 
       if(hit != null) {
@@ -225,7 +278,7 @@ public class App {
       RaycastHit hit = VoxelRaycast.raycast(world,
         c.getEyePos(),
         c.getForward(),
-        60.0f
+        6.0f
       );
 
       if(hit != null) {
