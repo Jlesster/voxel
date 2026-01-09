@@ -9,12 +9,24 @@ public class World {
 
   private final Map<Vector3i, Chunk> chunks = new HashMap<>();
 
+  public static final SimplexNoise NOISE = new SimplexNoise(1337L);
+
   public Chunk getChunk(Vector3i chunkPos) {
     return chunks.computeIfAbsent(chunkPos, pos -> {
       Chunk c = new Chunk(pos);
       TestGen.fillChunk(c);
       return c;
     });
+  }
+
+  public void generateInitChunks() {
+    int r = WorldConsts.INIT_CHUNK_RADS;
+
+    for(int cx = -r; cx <= r; cx++) {
+      for(int cz = -r; cz <= r; cz++) {
+        getChunk(new Vector3i(cx, 0, cz));
+      }
+    }
   }
 
   public byte get(int x, int y, int z) {

@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3i;
 
 
 public class App {
@@ -158,10 +157,14 @@ public class App {
 
     updateProjectionMatrix(wWidth, wHeight);
 
-    c = new Controller(8, 8, 30);
-    world = new World();
-    world.getChunk(new Vector3i(0, 0, 0));
+    //player controller
+    c = new Controller(8, 16, 30);
 
+    //world init
+    world = new World();
+    world.generateInitChunks();
+
+    //window resizing
     glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
       glViewport(0, 0, width, height);
       updateProjectionMatrix(width, height);
