@@ -64,10 +64,16 @@ public class App {
       processInput();
 
       loadMatrix(projMatrix, GL_PROJECTION);
-      loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
+      loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
 
       float dt = getDeltaTime();
-      c.update(world, dt, jumpPressed);
+
+      boolean f = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+      boolean b = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+      boolean l = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+      boolean r = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+
+      c.update(world, dt, jumpPressed, f, b, l, r);
 
       FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
       lightPos.put(new float[] {
@@ -84,7 +90,7 @@ public class App {
       );
 
       blockManip();
-      VoxelRender.render(world, projMatrix, Controller.getViewMatrix());
+      VoxelRender.render(world, projMatrix, c.getViewMatrix());
       if(currHit != null) {
         drawOutline(currHit.block);
       }
@@ -357,19 +363,6 @@ public class App {
   }
 
   private void processInput() {
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-      c.moveF();
-    }
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-      c.moveB();
-    }
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-      c.moveL();
-    }
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-      c.moveR();
-    }
-
     jumpPressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
   }
 
@@ -389,7 +382,7 @@ public class App {
       lastMouseX = xpos;
       lastMouseY = ypos;
 
-      Controller.processMouse(dx, dy);
+      c.processMouse(dx, dy);
     });
   }
 
