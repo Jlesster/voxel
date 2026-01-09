@@ -1,11 +1,9 @@
 package com.jless.voxel;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
 
@@ -16,7 +14,7 @@ public class Chunk {
   private final BlockMap blocks;
 
   private boolean dirty = true;
-  private boolean uploaded = true;
+  private boolean uploaded = false;
   private int vertexCount = 0;
   private int vboID = 0;
 
@@ -60,7 +58,7 @@ public class Chunk {
           if(!Blocks.SOLID[id]) continue;
 
           int wx = baseX + x;
-          int wz = baseX + z;
+          int wz = baseZ + z;
 
           for(int face = 0; face < 6; face++) {
             if(isFaceVisible(w, wx, y, wz, face)) {
@@ -76,33 +74,8 @@ public class Chunk {
     return buf;
   }
 
-  public void rebuildMesh(World world) {
-    mesh = new ArrayList<>();
-
-    BlockMap map = getBlockMap();
-
-    for(int x = 0; x < map.sizeX(); x++) {
-      for(int y = 0; y < map.sizeY(); y++) {
-        for(int z = 0; z < map.sizeZ(); z++) {
-          byte id = map.get(x, y, z);
-          if(!Blocks.SOLID[id]) continue;
-
-          int wx = position.x * WorldConsts.CHUNK_SIZE + x;
-          int wz = position.z * WorldConsts.CHUNK_SIZE + z;
-
-          for(int face = 0; face < 6; face++) {
-            if(isFaceVisible(world, wx, y, wz, face)) {
-              mesh.add(new VoxelFace(wx, y, wz, face, id));
-            }
-          }
-        }
-      }
-    }
-    dirty = false;
-  }
-
   public void ensureUploaded(World w) {
-    if(dirty && uploaded) return;
+    if(!dirty && uploaded) return;
 
     FloatBuffer data = buildMeshBuffer(w);
     uploadToGPU(data);
@@ -119,7 +92,7 @@ public class Chunk {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  private int emitFaceAsTriangles(FloatBuffer b, int x, int y, int z, int facec, float[] color) {
+  private int emitFaceAsTriangles(FloatBuffer b, int x, int y, int z, int face, float[] color) {
     float nx = 0, ny = 0, nz = 0;
     float x0 = x, x1 = x + 1;
     float y0 = y, y1 = y + 1;

@@ -29,12 +29,16 @@ public class App {
   private boolean breakReq = false;
   private boolean placeReq = false;
 
+  private boolean jumpPressed = false;
+
   public static long window;
   public static int wWidth = 1280;
   public static int wHeight = 720;
 
   public static int vSync = 1;
   public static float FOV = 70.0f;
+
+  private double lastTime = 0.0;
 
   private double lastMouseX, lastMouseY;
   private boolean firstMouse = true;
@@ -62,6 +66,8 @@ public class App {
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
 
+      float dt = getDeltaTime();
+      c.update(world, dt, jumpPressed);
 
       FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
       lightPos.put(new float[] {
@@ -78,7 +84,7 @@ public class App {
       );
 
       blockManip();
-      VoxelRender.render(world);
+      VoxelRender.render(world, projMatrix, Controller.getViewMatrix());
       if(currHit != null) {
         drawOutline(currHit.block);
       }
@@ -122,6 +128,7 @@ public class App {
     line(x - eps, y + 1 + eps, z + 1 + eps, x - eps, y + 1 + eps, z - eps);
 
     glEnd();
+    glEnable(GL_TEXTURE_2D);
     glEnable(GL_CULL_FACE);
   }
 
@@ -229,7 +236,7 @@ public class App {
     updateProjectionMatrix(wWidth, wHeight);
 
     //player controller
-    c = new Controller(8, 16, 30);
+    c = new Controller(8, 40, 30);
 
     //world init
     world = new World();
@@ -362,12 +369,8 @@ public class App {
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
       c.moveR();
     }
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-      c.moveU();
-    }
-    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-      c.moveD();
-    }
+
+    jumpPressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
   }
 
   private void setupMouse() {
@@ -388,6 +391,13 @@ public class App {
 
       Controller.processMouse(dx, dy);
     });
+  }
+
+  private float getDeltaTime() {
+    double now = glfwGetTime();
+    float dt = (float)(now - lastTime);
+    lastTime = now;
+    return Math.min(dt, 0.05f);
   }
 
   private void waylandCheck() {

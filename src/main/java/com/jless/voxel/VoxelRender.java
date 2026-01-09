@@ -2,10 +2,28 @@ package com.jless.voxel;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class VoxelRender {
+import org.joml.FrustumIntersection;
+import org.joml.Matrix4f;
 
-  public static void render(World world) {
+public class VoxelRender {
+  private static final FrustumIntersection frustum = new FrustumIntersection();
+  private static final Matrix4f pv = new Matrix4f();
+
+  public static void render(World world, Matrix4f proj, Matrix4f view) {
+    pv.set(proj).mul(view);
+    frustum.set(pv);
+
     for(Chunk chunk : world.getLoadedChunks()) {
+      int minX = chunk.position.x * WorldConsts.CHUNK_SIZE;
+      int minY = 0;
+      int minZ = chunk.position.z * WorldConsts.CHUNK_SIZE;
+
+      int maxX = minX + WorldConsts.CHUNK_SIZE;
+      int maxY = WorldConsts.WORLD_HEIGHT;
+      int maxZ = minZ + WorldConsts.CHUNK_SIZE;
+
+      if(!frustum.testAab(minX, minY, minZ, maxX, maxY, maxZ)) continue;
+
       chunk.ensureUploaded(world);
       chunk.drawVBO();
     }
