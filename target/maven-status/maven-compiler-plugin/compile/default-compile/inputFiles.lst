@@ -2,7 +2,11 @@
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/BlockID.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/BlockMap.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Blocks.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Chunk.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/ChunkCoords.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Controller.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/TestGen.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/VoxelCuller.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/VoxelRender.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/World.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/WorldConsts.java

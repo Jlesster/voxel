@@ -24,4 +24,21 @@ public class TestGen {
     }
   }
 
+  public static void fillChunk(Chunk chunk) {
+    int groundY = 8;
+
+    BlockMap map = chunk.getBlockMap();
+
+    for(int x = 0; x < map.sizeX(); x++) {
+      for(int y = 0; y < map.sizeY(); y++) {
+        for(int z = 0; z < map.sizeZ(); z++) {
+          if(y < groundY - 3) map.set(x, y, z, BlockID.STONE);
+          else if(y < groundY) map.set(x, y, z, BlockID.DIRT);
+          else if(y == groundY) map.set(x, y, z, BlockID.GRASS);
+          else map.set(x, y, z, BlockID.AIR);
+        }
+      }
+    }
+  }
+
 }

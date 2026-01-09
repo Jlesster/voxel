@@ -12,10 +12,11 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3i;
 
 
 public class App {
-  private BlockMap world;
+  private World world;
   public Controller c;
 
   private Matrix4f projMatrix;
@@ -50,10 +51,9 @@ public class App {
 
   private void loop() {
     while(!glfwWindowShouldClose(window)) {
-      processInput();
-
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glColor3f(0.6f, 0.6f, 0.6f);
+
+      processInput();
 
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
@@ -66,6 +66,7 @@ public class App {
       glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
       VoxelRender.render(world);
+      // VoxelRender.renderChunkGrid(world);
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -158,8 +159,8 @@ public class App {
     updateProjectionMatrix(wWidth, wHeight);
 
     c = new Controller(8, 8, 30);
-    world = new BlockMap(64, 32, 64);
-    TestGen.fill(world);
+    world = new World();
+    world.getChunk(new Vector3i(0, 0, 0));
 
     glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
       glViewport(0, 0, width, height);
