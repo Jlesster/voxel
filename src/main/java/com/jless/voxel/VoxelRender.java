@@ -2,38 +2,15 @@ package com.jless.voxel;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import org.joml.Vector3i;
-
 public class VoxelRender {
 
   public static void render(World world) {
     for(Chunk chunk : world.getLoadedChunks()) {
-      Vector3i cp = chunk.position;
+      for(VoxelFace f : chunk.getMesh(world)) {
+        float[] c = Blocks.COLOR[f.blockID];
+        glColor3f(c[0], c[1], c[2]);
 
-      int baseX = cp.x * WorldConsts.CHUNK_SIZE;
-      int baseZ = cp.z * WorldConsts.CHUNK_SIZE;
-
-      BlockMap map = chunk.getBlockMap();
-
-      for(int x = 0; x < map.sizeX(); x++) {
-        for(int y = 0; y < map.sizeY(); y++) {
-          for(int z = 0; z < map.sizeZ(); z++) {
-            byte id = map.get(x, y, z);
-            if(!Blocks.SOLID[id]) continue;
-
-            float[] c = Blocks.COLOR[id];
-            glColor3f(c[0], c[1], c[2]);
-
-            int wx = baseX + x;
-            int wz = baseZ + z;
-
-            for(int face = 0; face < 6; face++) {
-              if(VoxelCuller.isFaceVisible(map, x, y, z, face)) {
-                drawFace(wx, y, wz, face);
-              }
-            }
-          }
-        }
+        drawFace(f.x, f.y, f.z, f.face);
       }
     }
   }

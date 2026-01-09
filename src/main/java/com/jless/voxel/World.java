@@ -7,36 +7,50 @@ import org.joml.Vector3i;
 
 public class World {
 
-  private final Map<Vector3i, Chunk> chunks = new HashMap<>();
+  private final Map<Long, Chunk> chunks = new HashMap<>();
 
   public static final SimplexNoise NOISE = new SimplexNoise(1337L);
 
-  public Chunk getChunk(Vector3i chunkPos) {
-    return chunks.computeIfAbsent(chunkPos, pos -> {
-      Chunk c = new Chunk(pos);
-      TestGen.fillChunk(c);
-      return c;
-    });
+  public Chunk getChunk(int cx, int cz) {
+    long key = chunkKey(cx, cz);
+    Chunk c = chunks.get(key);
+    if(c != null) return c;
+
+    c = new Chunk(new Vector3i(cx, 0, cz));
+    TestGen.fillChunk(c);
+    chunks.put(key, c);
+    return c;
   }
 
-  public void generateInitChunks() {
+  public void generateSpawn() {
     int r = WorldConsts.INIT_CHUNK_RADS;
 
     for(int cx = -r; cx <= r; cx++) {
       for(int cz = -r; cz <= r; cz++) {
-        getChunk(new Vector3i(cx, 0, cz));
+        getChunk(cx, cz);
       }
     }
   }
 
-  public byte get(int x, int y, int z) {
-    Vector3i chunkPos = new Vector3i(
-      ChunkCoords.chunk(x),
-      0,
-      ChunkCoords.chunk(z)
-    );
+  public byte getIfLoaded(int x, int y, int z) {
+    int cx = ChunkCoords.chunk(x);
+    int cz = ChunkCoords.chunk(z);
 
-    Chunk chunk = getChunk(chunkPos);
+    Chunk chunk = chunks.get(chunkKey(cx, cz));
+    if(chunk == null) {
+      return BlockID.AIR;
+    }
+    int lx = ChunkCoords.local(x);
+    int lz = ChunkCoords.local(z);
+
+    return chunk.get(lx, y, lz);
+  }
+
+  public byte get(int x, int y, int z) {
+    int cx = ChunkCoords.chunk(x);
+    int cz = ChunkCoords.chunk(z);
+
+    Chunk chunk = getChunk(cx, cz);
 
     int lx = ChunkCoords.local(x);
     int lz = ChunkCoords.local(z);
@@ -45,21 +59,43 @@ public class World {
   }
 
   public void set(int x, int y , int z, byte id) {
-    Vector3i chunkPos = new Vector3i(
-      ChunkCoords.chunk(x),
-      0,
-      ChunkCoords.chunk(z)
-    );
+    int cx = ChunkCoords.chunk(x);
+    int cz = ChunkCoords.chunk(z);
 
-    Chunk chunk = getChunk(chunkPos);
+    Chunk chunk = getChunk(cx, cz);
 
     int lx = ChunkCoords.local(x);
     int lz = ChunkCoords.local(z);
 
-    chunk.set(lx,y,lz, id);
+    chunk.set(lx, y, lz, id);
+    chunk.markDirty();
+
+    if(lx == 0) {
+      markNeighborDirty(cx - 1, cz);
+    }
+    if(lx == WorldConsts.CHUNK_SIZE - 1) {
+      markNeighborDirty(cx + 1, cz);
+    }
+    if(lz == 0) {
+      markNeighborDirty(cx, cz - 1);
+    }
+    if(lz == WorldConsts.CHUNK_SIZE - 1) {
+      markNeighborDirty(cx, cz + 1);
+    }
   }
 
-  public Iterable<Chunk> getLoadedChunks() {
+  private static long chunkKey(int cx, int cz) {
+    return (((long)cx) << 32) ^ (cz & 0xffffffffL);
+  }
+
+  private void markNeighborDirty(int x, int z) {
+    Chunk neighbor = chunks.get(chunkKey(x, z));
+    if(neighbor != null) {
+      neighbor.markDirty();
+    }
+  }
+
+public Iterable<Chunk> getLoadedChunks() {
     return chunks.values();
   }
 }

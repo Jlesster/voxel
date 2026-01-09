@@ -8,6 +8,7 @@ public class Controller {
   private static Matrix4f viewMatrix;
   private static Vector3f position;
 
+  private static final float EYE_HEIGHT = 1.4f;
   private static float pitch;
   private static float yaw;
   private static float roll;
@@ -32,7 +33,7 @@ public class Controller {
     viewMatrix.rotateZ(roll);
 
     //apply translation
-    viewMatrix.translate(-position.x, -position.y, -position.z);
+    viewMatrix.translate(-position.x, -position.y - EYE_HEIGHT, -position.z);
 
     return viewMatrix;
   }
@@ -46,13 +47,12 @@ public class Controller {
     if(pitch < Math.toRadians(-89.0f)) pitch = (float)Math.toRadians(-89.0f);
   }
 
-  private Vector3f getForward() {
-    Vector3f forward = new Vector3f();
-    float p = -pitch;
+  public Vector3f getForward() {
+    Vector3f forward = new Vector3f(0, 0, -1);
 
-    forward.x = (float)(Math.cos(p) * Math.sin(yaw));
-    forward.y = (float)(Math.sin(p));
-    forward.z = (float)(-Math.cos(p) * Math.cos(yaw));
+    Matrix4f viewMatrix = new Matrix4f(getViewMatrix());
+    viewMatrix.invert();
+    viewMatrix.transformDirection(forward);
 
     return forward.normalize();
   }
@@ -86,6 +86,13 @@ public class Controller {
   public void moveD() {position.y -= moveSpeed;}
 
   public Vector3f getPosition() {return position;}
+  public Vector3f getEyePos() {
+    return new Vector3f(
+      position.x,
+      position.y + EYE_HEIGHT,
+      position.z
+    );
+  }
   public float getX() {return position.x;}
   public float getY() {return position.y;}
   public float getZ() {return position.z;}

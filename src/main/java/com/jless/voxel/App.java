@@ -12,9 +12,11 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3i;
 
 
 public class App {
+  private UI ui;
   private World world;
   public Controller c;
 
@@ -23,13 +25,12 @@ public class App {
   private Matrix4f modelMatrix;
   private FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
+  private boolean breakReq = false;
+  private boolean placeReq = false;
 
   public static long window;
-  public static int wWidth = 800;
-  public static int wHeight = 800;
-
-  private static final int CHUNK_SIZE = 16;
-  private static final int CHUNK_HEIGHT = 256;
+  public static int wWidth = 1280;
+  public static int wHeight = 720;
 
   public static int vSync = 1;
   public static float FOV = 70.0f;
@@ -41,6 +42,9 @@ public class App {
     waylandCheck();
     initWindow();
     initGL();
+
+    ui = new UI();
+    ui.initGUI(window);
 
     setupMouse();
 
@@ -57,6 +61,7 @@ public class App {
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
 
+
       FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
       lightPos.put(new float[] {
         0.5f, 1.0f, 0.3f, 0.0f //dir light
@@ -64,8 +69,11 @@ public class App {
 
       glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
+
+      blockManip();
       VoxelRender.render(world);
-      // VoxelRender.renderChunkGrid(world);
+      drawCrosshair();
+      ui.renderGUI();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -104,6 +112,16 @@ public class App {
     glfwSetMouseButtonCallback(window, (win, button, action, mods) -> {
       if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      }
+
+      //Raycast breaking
+      if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        breakReq = true;
+      }
+
+      //raycast placing
+      if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        placeReq = true;
       }
     });
 
@@ -162,7 +180,7 @@ public class App {
 
     //world init
     world = new World();
-    world.generateInitChunks();
+    world.generateSpawn();
 
     //window resizing
     glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
@@ -178,6 +196,91 @@ public class App {
     }
   }
 
+  private void blockManip() {
+    if(breakReq) {
+      breakReq = false;
+      System.out.println("breakRequested fired");
+
+      RaycastHit hit = VoxelRaycast.raycast(world,
+        c.getEyePos(),
+        c.getForward(),
+        60.0f
+      );
+
+      if(hit != null) {
+        world.set(
+          hit.block.x,
+          hit.block.y,
+          hit.block.z,
+          BlockID.AIR
+        );
+        byte after = world.getIfLoaded(hit.block.x, hit.block.y, hit.block.z);
+        System.out.println("After set, id=" + after);
+      }
+    }
+
+    if(placeReq) {
+      placeReq = false;
+
+      RaycastHit hit = VoxelRaycast.raycast(world,
+        c.getEyePos(),
+        c.getForward(),
+        60.0f
+      );
+
+      if(hit != null) {
+        Vector3i p = new Vector3i(hit.block).add(hit.normal);
+        world.set(
+          p.x,
+          p.y,
+          p.z,
+          BlockID.STONE
+        );
+      }
+    }
+  }
+
+  public static void drawCrosshair() {
+      // Disable depth test for UI elements
+      glDisable(GL_DEPTH_TEST);
+      glDisable(GL_LIGHTING);
+
+      // Switch to 2D orthographic projection
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      glOrtho(0, App.wWidth, 0, App.wHeight, -1, 1);
+
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glLoadIdentity();
+
+      // Draw crosshair at screen center
+      float cx = App.wWidth / 2.0f;
+      float cy = App.wHeight / 2.0f;
+      float size = 10.0f;
+
+      glColor3f(1.0f, 1.0f, 1.0f);
+      glLineWidth(2.0f);
+
+      glBegin(GL_LINES);
+      // Horizontal line
+      glVertex2f(cx - size, cy);
+      glVertex2f(cx + size, cy);
+      // Vertical line
+      glVertex2f(cx, cy - size);
+      glVertex2f(cx, cy + size);
+      glEnd();
+
+      // Restore matrices
+      glPopMatrix();
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_LIGHTING);
+  }
 
   private void updateProjectionMatrix(int width, int height) {
     projMatrix = new Matrix4f().perspective(
