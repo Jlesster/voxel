@@ -1,8 +1,2 @@
-com/jless/voxel/World.class
 com/jless/voxel/Controller.class
-com/jless/voxel/SimpleNoiseGen.class
-com/jless/voxel/UI.class
-com/jless/voxel/Chunk.class
 com/jless/voxel/App.class
-com/jless/voxel/VoxelMesh.class
-com/jless/voxel/TerrainGenerator.class

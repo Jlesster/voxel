@@ -15,9 +15,9 @@ import org.joml.Matrix4f;
 
 
 public class App {
-  UI ui;
-
+  private BlockMap world;
   public Controller c;
+
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
   private Matrix4f modelMatrix;
@@ -28,19 +28,19 @@ public class App {
   public static int wWidth = 800;
   public static int wHeight = 800;
 
+  private static final int CHUNK_SIZE = 16;
+  private static final int CHUNK_HEIGHT = 256;
+
   public static int vSync = 1;
   public static float FOV = 70.0f;
+
   private double lastMouseX, lastMouseY;
   private boolean firstMouse = true;
 
   private void run() {
-    ui = new UI(this);
-
     waylandCheck();
     initWindow();
     initGL();
-
-    ui.initGui(window);
 
     setupMouse();
 
@@ -49,12 +49,11 @@ public class App {
   }
 
   private void loop() {
-    World world = new World();
-    world.generateTerra(32);
     while(!glfwWindowShouldClose(window)) {
       processInput();
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glColor3f(0.6f, 0.6f, 0.6f);
 
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(Controller.getViewMatrix(), GL_MODELVIEW);
@@ -66,8 +65,7 @@ public class App {
 
       glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-      world.render();
-      ui.guiFrameRender();
+      VoxelRender.render(world);
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -160,6 +158,8 @@ public class App {
     updateProjectionMatrix(wWidth, wHeight);
 
     c = new Controller(8, 8, 30);
+    world = new BlockMap(64, 32, 64);
+    TestGen.fill(world);
 
     glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
       glViewport(0, 0, width, height);
@@ -173,6 +173,7 @@ public class App {
       glViewport(0, 0, w.get(0), h.get(0));
     }
   }
+
 
   private void updateProjectionMatrix(int width, int height) {
     projMatrix = new Matrix4f().perspective(
