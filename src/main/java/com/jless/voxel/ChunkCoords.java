@@ -1,13 +1,8 @@
 package com.jless.voxel;
 
 public class ChunkCoords {
-  public int cx;
-  public int cz;
 
-  public ChunkCoords(int cx, int cz) {
-    this.cx = cx;
-    this.cz = cz;
-  }
+  public ChunkCoords() {}
 
   public static int chunk(int worldCoord) {
     return Math.floorDiv(worldCoord, WorldConsts.CHUNK_SIZE);

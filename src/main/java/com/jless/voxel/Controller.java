@@ -15,7 +15,7 @@ public class Controller {
   private float roll;
 
   private static final float WIDTH = 0.6f;
-  private static final float HEIGHT = 1.0f;
+  private static final float HEIGHT = 1.8f;
 
   private Vector3f wishDir = new Vector3f();
 
@@ -159,7 +159,19 @@ public class Controller {
     }
   }
 
-  private boolean collides(World w) {
+  public boolean wouldCollideWithBlock(int bx, int by, int bz) {
+    float minX = position.x - WIDTH / 2f;
+    float minY = position.y;
+    float minZ = position.z - WIDTH / 2f;
+    float maxX = position.x + WIDTH / 2f;
+    float maxY = position.y + HEIGHT;
+    float maxZ = position.z + WIDTH / 2f;
+
+    return bx < maxX && bx + 1 > minX &&
+           by < maxY && by + 1 > minY &&
+           bz < maxZ && bz + 1 > minZ;
+  }
+  public boolean collides(World w) {
     float minX = position.x - WIDTH / 2f;
     float minY = position.y;
     float minZ = position.z - WIDTH / 2f;

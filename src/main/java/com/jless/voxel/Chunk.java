@@ -92,7 +92,24 @@ public class Chunk {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  private int emitFaceAsTriangles(FloatBuffer b, int x, int y, int z, int face, float[] color) {
+  private int emitFaceAsTriangles(FloatBuffer b, int x, int y, int z, int face, byte blockID) {
+    int tx = 0;
+    int ty = 0;
+
+    if(blockID == BlockID.GRASS) {
+      if(face == Blocks.TEX_TOP[blockID]) { tx = 0; ty = 0; }
+      else if(face == Blocks.TEX_BOTTOM[blockID]) { tx = 2; ty = 0; }
+      else { tx = 1; ty = 0; }
+    }
+
+    float[] uv = new float[4];
+    getTileUV(tx, ty, uv);
+
+    float u0 = uv[0];
+    float v0 = uv[1];
+    float u1 = uv[2];
+    float v1 = uv[3];
+
     float nx = 0, ny = 0, nz = 0;
     float x0 = x, x1 = x + 1;
     float y0 = y, y1 = y + 1;
@@ -147,13 +164,13 @@ public class Chunk {
         dx = x1; dy = y0; dz = z0;
       }
     }
-    putV(b, ax, ay, az, nx, ny, nz, color);
-    putV(b, bx, by, bz, nx, ny, nz, color);
-    putV(b, cx, cy, cz, nx, ny, nz, color);
+    putV(b, ax, ay, az, nx, ny, nz, u0, v0);
+    putV(b, bx, by, bz, nx, ny, nz, u1, v0);
+    putV(b, cx, cy, cz, nx, ny, nz, u1, v1);
 
-    putV(b, ax, ay, az, nx, ny, nz, color);
-    putV(b, cx, cy, cz, nx, ny, nz, color);
-    putV(b, dx, dy, dz, nx, ny, nz, color);
+    putV(b, ax, ay, az, nx, ny, nz, u0, v0);
+    putV(b, cx, cy, cz, nx, ny, nz, u1, v1);
+    putV(b, dx, dy, dz, nx, ny, nz, u0, v1);
 
     return 6;
   }
@@ -161,10 +178,10 @@ public class Chunk {
   private void putV(FloatBuffer b,
     float px, float py, float pz,
     float nx, float ny, float nz,
-    float[] c) {
+    float u, float v) {
     b.put(px).put(py).put(pz);
     b.put(nx).put(ny).put(nz);
-    b.put(c[0]).put(c[1]).put(c[2]);
+    b.put(u).put(v);
   }
 
   public void drawVBO() {
@@ -177,18 +194,33 @@ public class Chunk {
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glVertexPointer(3, GL_FLOAT, stride, 0L);
     glNormalPointer(GL_FLOAT, stride, 3L * Float.BYTES);
     glColorPointer(3, GL_FLOAT, stride, 6L * Float.BYTES);
+    glTexCoordPointer(2, GL_FLOAT, stride, 4l * Float.BYTES);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  private static void getTileUV(int tx, int ty, float[] out) {
+    float tileSize = 1.0f / 16.0f;
+    float u0 = tx * tileSize;
+    float v0 = ty * tileSize;
+
+    float u1 = u0 + tileSize;
+    float v1 = v0 + tileSize;
+
+    out[0] = u0; out[1] = v0;
+    out[2] = u1; out[3] = v1;
   }
 
   public void markDirty() {

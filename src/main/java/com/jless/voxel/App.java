@@ -19,7 +19,9 @@ public class App {
   private UI ui;
   private World world;
   public Controller c;
+  private VoxelRender voxelRender;
   private RaycastHit currHit = null;
+  private final EntityManager entityManager = new EntityManager();
 
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
@@ -48,7 +50,9 @@ public class App {
     initWindow();
     initGL();
 
+    voxelRender = new VoxelRender();
     ui = new UI();
+
     ui.initGUI(window);
 
     setupMouse();
@@ -59,14 +63,10 @@ public class App {
 
   private void loop() {
     while(!glfwWindowShouldClose(window)) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      processInput();
-
-      loadMatrix(projMatrix, GL_PROJECTION);
-      loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
-
       float dt = getDeltaTime();
+
+      glfwPollEvents();
+      processInput();
 
       boolean f = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
       boolean b = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
@@ -74,13 +74,7 @@ public class App {
       boolean r = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 
       c.update(world, dt, jumpPressed, f, b, l, r);
-
-      FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
-      lightPos.put(new float[] {
-        0.5f, 1.0f, 0.3f, 0.0f //dir light
-      }).flip();
-
-      glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+      entityManager.update(world, c.getPosition(), dt);
 
       currHit = VoxelRaycast.raycast(
         world,
@@ -90,15 +84,30 @@ public class App {
       );
 
       blockManip();
+
+      FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
+      lightPos.put(new float[] {
+        0.5f, 1.0f, 0.3f, 0.0f //dir light
+      }).flip();
+
+      glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      loadMatrix(projMatrix, GL_PROJECTION);
+      loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
+
       VoxelRender.render(world, projMatrix, c.getViewMatrix());
+
       if(currHit != null) {
         ui.drawOutline(currHit.block);
       }
 
+      entityManager.render(voxelRender);
+
       ui.renderGUI();
 
       glfwSwapBuffers(window);
-      glfwPollEvents();
     }
   }
 
@@ -252,12 +261,14 @@ public class App {
 
       if(hit != null) {
         Vector3i p = new Vector3i(hit.block).add(hit.normal);
-        world.set(
-          p.x,
-          p.y,
-          p.z,
-          BlockID.STONE
-        );
+        if(!c.wouldCollideWithBlock(p.x, p.y, p.z)) {
+          world.set(
+            p.x,
+            p.y,
+            p.z,
+            BlockID.STONE
+          );
+        }
       }
     }
   }

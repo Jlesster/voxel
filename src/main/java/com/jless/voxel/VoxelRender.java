@@ -51,4 +51,51 @@ public class VoxelRender {
     }
     glEnable(GL_LIGHTING);
   }
+
+  public static void debugVoxel(int x, int y, int z, float[] rgb) {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glColor3f(rgb[0], rgb[1], rgb[2]);
+    glBegin(GL_QUADS);
+
+    glNormal3f(1, 0, 0);
+    glVertex3f(x + 1, y,     z);
+    glVertex3f(x + 1, y + 1, z);
+    glVertex3f(x + 1, y + 1, z + 1);
+    glVertex3f(x + 1, y,     z + 1);
+
+    glNormal3f(-1, 0, 0);
+    glVertex3f(x, y,     z + 1);
+    glVertex3f(x, y + 1, z + 1);
+    glVertex3f(x, y + 1, z);
+    glVertex3f(x, y,     z);
+
+    glNormal3f(0, 1, 0);
+    glVertex3f(x,     y + 1, z);
+    glVertex3f(x + 1, y + 1, z);
+    glVertex3f(x + 1, y + 1, z + 1);
+    glVertex3f(x,     y + 1, z + 1);
+
+    glNormal3f(0, -1, 0);
+    glVertex3f(x,     y, z + 1);
+    glVertex3f(x + 1, y, z + 1);
+    glVertex3f(x + 1, y, z);
+    glVertex3f(x,     y, z);
+
+    glNormal3f(0, 0, 1);
+    glVertex3f(x + 1, y,     z + 1);
+    glVertex3f(x + 1, y + 1, z + 1);
+    glVertex3f(x,     y + 1, z + 1);
+    glVertex3f(x,     y,     z + 1);
+
+    glNormal3f(0, 0, -1);
+    glVertex3f(x,     y,     z);
+    glVertex3f(x,     y + 1, z);
+    glVertex3f(x + 1, y + 1, z);
+    glVertex3f(x + 1, y,     z);
+
+    glEnd();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
+  }
 }

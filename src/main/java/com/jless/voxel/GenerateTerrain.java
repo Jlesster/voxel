@@ -36,7 +36,6 @@ public class GenerateTerrain {
         }
       }
     }
-    World.applyQueuedBlocks(chunk);
     populateTrees(chunk, world);
   }
 
@@ -65,38 +64,35 @@ public class GenerateTerrain {
         int h = WorldConsts.TREE_MIN_HEIGHT + (int)(hash01(wx + 99, wz - 99, seed) * (WorldConsts.TREE_MAX_HEIGHT - WorldConsts.TREE_MIN_HEIGHT + 1));
 
         if(surfY + h + 4 >= map.sizeY()) continue;
-        placeTree(world, c,x, surfY + 1, z, h);
+        placeTree(world, wx, surfY + 1, wz, h);
       }
     }
   }
 
-  private static void placeTree(World world, Chunk chunk,int x, int y, int z, int height) {
-    BlockMap map = chunk.getBlockMap();
+  private static void placeTree(World world, int wx, int wy, int wz, int height) {
     for(int i = 0; i < height; i++) {
-      map.set(x, y + i, z, BlockID.LOG);
+      setBlockWorld(world, wx, wy + i, wz, BlockID.LOG);
     }
 
-    int wx = chunk.position.x * WorldConsts.CHUNK_SIZE + x;
-    int wz = chunk.position.z * WorldConsts.CHUNK_SIZE + x;
-    int top = y + height;
+    int top = wy + height;
     int centerY = top + 1;
 
     int r = WorldConsts.TREE_CANOPY_RADS;
     for(int dx = -r; dx <= r; dx++) {
       for(int dz = -r; dz < r; dz++) {
         for(int dy = -r; dy < r; dy++) {
-          int xx = x + dx;
+          int xx = wx + dx;
           int yy = centerY + dy;
-          int zz = z + dz;
+          int zz = wz + dz;
 
-          if(xx < 0 || zz < 0 || yy < 0) continue;
-          if(xx >= map.sizeX() || zz >= map.sizeZ() || yy >= map.sizeY()) continue;
+          if(yy < 0 || yy >= WorldConsts.WORLD_HEIGHT) continue;
 
           int dist2 = (dx * dx) + (dy * dy) + (dz * dz);
           if(dist2 > (r * r) + 1) continue;
 
-          if(map.get(xx, yy, zz) == BlockID.AIR) {
-            map.set(xx, yy, zz, BlockID.LEAF);
+          byte existing = world.getIfLoaded(xx, yy, zz);
+          if(existing == BlockID.AIR) {
+            setBlockWorld(world, xx, yy, zz, BlockID.LEAF);
           }
         }
       }
@@ -107,15 +103,15 @@ public class GenerateTerrain {
     int cx = Math.floorDiv(wx, WorldConsts.CHUNK_SIZE);
     int cz = Math.floorDiv(wz, WorldConsts.CHUNK_SIZE);
 
-    int lx = Math.floorDiv(wx, WorldConsts.CHUNK_SIZE);
-    int lz = Math.floorDiv(wz, WorldConsts.CHUNK_SIZE);
+    int lx = Math.floorMod(wx, WorldConsts.CHUNK_SIZE);
+    int lz = Math.floorMod(wz, WorldConsts.CHUNK_SIZE);
 
     Chunk chunk = w.getChunkIfLoaded(cx, cz);
     if(chunk == null) {
       w.queueBlock(wx, wy, wz, id);
       return;
     }
-    chunk.getBlockMap().set(lx, wy, wz, id);
+    chunk.getBlockMap().set(lx, wy, lz, id);
     chunk.markDirty();
   }
 

@@ -7,7 +7,7 @@ import org.joml.Vector3i;
 public class World {
 
   private final Map<Long, Chunk> chunks = new HashMap<>();
-  private final static Map<ChunkCoords, ArrayList<QueuedBlock>> queue = new HashMap<>();
+  private final static Map<Long, ArrayList<QueuedBlock>> queue = new HashMap<>();
 
   public static final SimplexNoise NOISE = new SimplexNoise(WorldConsts.WORLD_SEED);
 
@@ -18,6 +18,7 @@ public class World {
 
     c = new Chunk(new Vector3i(cx, 0, cz));
     GenerateTerrain.fillChunk(c, this);
+    applyQueuedBlocks(c);
     chunks.put(key, c);
     return c;
   }
@@ -95,26 +96,44 @@ public class World {
     }
   }
 
+  public byte getBlockWorld(int wx, int wy, int wz) {
+    Chunk c = getChunkIfLoaded(Math.floorDiv(wx, WorldConsts.CHUNK_SIZE), Math.floorDiv(wz, WorldConsts.CHUNK_SIZE));
+
+    if(c == null) return BlockID.AIR;
+
+    int lx = Math.floorMod(wx, WorldConsts.CHUNK_SIZE);
+    int lz = Math.floorMod(wz, WorldConsts.CHUNK_SIZE);
+    return c.getBlockMap().get(lx, wy, lz);
+  }
+
+  public int getSurfaceY(int wx, int wz) {
+    for(int y = WorldConsts.WORLD_HEIGHT - 2; y >= 1; y--) {
+      byte b = getBlockWorld(wx, y ,wz);
+      if(b != BlockID.AIR) return y;
+    }
+    return -1;
+  }
+
   public Iterable<Chunk> getLoadedChunks() {
     return chunks.values();
   }
 
   public Chunk getChunkIfLoaded(int cx, int cz) {
-    return chunks.get(new ChunkCoords(cx, cz));
+    return chunks.get(chunkKey(cx, cz));
   }
 
   public void queueBlock(int wx, int wy, int wz, byte id) {
     int cx = Math.floorDiv(wx, WorldConsts.CHUNK_SIZE);
     int cz = Math.floorDiv(wz, WorldConsts.CHUNK_SIZE);
 
-    ChunkCoords cc = new ChunkCoords(cx, cz);
-    queue.computeIfAbsent(cc, k -> new ArrayList<>()).add(new QueuedBlock(wx, wy, wz, id));
+    long key = chunkKey(cx, cz);
+    queue.computeIfAbsent(key, k -> new ArrayList<>()).add(new QueuedBlock(wx, wy, wz, id));
   }
 
   public static void applyQueuedBlocks(Chunk chunk) {
-    ChunkCoords cc = new ChunkCoords(chunk.position.x, chunk.position.z);
+    long key = chunkKey(chunk.position.x, chunk.position.z);
 
-    ArrayList<QueuedBlock> list = queue.remove(cc);
+    ArrayList<QueuedBlock> list = queue.remove(key);
     if(list == null) return;
 
     BlockMap map = chunk.getBlockMap();
