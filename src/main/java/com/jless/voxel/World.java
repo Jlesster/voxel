@@ -9,7 +9,7 @@ public class World {
 
   private final Map<Long, Chunk> chunks = new HashMap<>();
 
-  public static final SimplexNoise NOISE = new SimplexNoise(1337L);
+  public static final SimplexNoise NOISE = new SimplexNoise(WorldConsts.WORLD_SEED);
 
   public Chunk getChunk(int cx, int cz) {
     long key = chunkKey(cx, cz);
@@ -17,7 +17,7 @@ public class World {
     if(c != null) return c;
 
     c = new Chunk(new Vector3i(cx, 0, cz));
-    TestGen.fillChunk(c);
+    GenerateTerrain.fillChunk(c);
     chunks.put(key, c);
     return c;
   }

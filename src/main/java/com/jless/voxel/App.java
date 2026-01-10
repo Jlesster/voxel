@@ -36,7 +36,7 @@ public class App {
   public static int wHeight = 720;
 
   public static int vSync = 1;
-  public static float FOV = 70.0f;
+  public static float FOV = 90.0f;
 
   private double lastTime = 0.0;
 
@@ -265,7 +265,7 @@ public class App {
   private void updateProjectionMatrix(int width, int height) {
     projMatrix = new Matrix4f().perspective(
       (float)Math.toRadians(FOV),     //fov in radians
-      (float)width / height,            //aspect ratio
+      (float)width / height,              //aspect ratio
       0.1f,                               //near plane
       1000.0f                             //far plane
     );

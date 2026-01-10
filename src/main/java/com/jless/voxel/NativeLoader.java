@@ -1,4 +1,4 @@
-package com.jless.opengl;
+package com.jless.voxel;
 
 import java.io.*;
 import java.lang.reflect.Field;

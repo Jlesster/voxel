@@ -77,14 +77,4 @@ public class VoxelRaycast {
     }
     return null;
   }
-
-  private static float intBound(float s, float ds) {
-    if(ds > 0) {
-      return (float)((Math.ceil(s) - s) / ds);
-    } else if(ds < 0) {
-      return (float)((s - Math.floor(s)) / ds);
-    } else {
-      return Float.MAX_VALUE;
-    }
-  }
 }

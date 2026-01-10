@@ -41,7 +41,7 @@ public class Chunk {
   }
 
   private FloatBuffer buildMeshBuffer(World w) {
-    int initFloats = 200_000;
+    int initFloats = 400_000;
     FloatBuffer buf = BufferUtils.createFloatBuffer(initFloats);
 
     BlockMap map = getBlockMap();
