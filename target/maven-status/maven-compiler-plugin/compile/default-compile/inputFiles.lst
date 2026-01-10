@@ -13,6 +13,7 @@
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Blocks.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/BlockID.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/WorldConsts.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/QueuedBlock.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Controller.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/World.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/UI.java

@@ -12,8 +12,13 @@ public class Blocks {
     SOLID[BlockID.DIRT] = true;
     SOLID[BlockID.STONE] = true;
 
+    SOLID[BlockID.LOG] = true;
+    SOLID[BlockID.LEAF] = true;
+
     COLOR[BlockID.GRASS] = new float[] {0.3f, 0.8f, 0.3f};
     COLOR[BlockID.DIRT] = new float[] {0.5f, 0.3f, 0.2f};
     COLOR[BlockID.STONE] = new float[] {0.4f, 0.4f, 0.4f};
+    COLOR[BlockID.LOG] = new float[] {0.55f, 0.27f, 0.07f};
+    COLOR[BlockID.LEAF] = new float[] {0.10f, 0.55f, 0.10f};
   }
 }

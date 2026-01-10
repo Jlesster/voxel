@@ -1,13 +1,13 @@
 package com.jless.voxel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.joml.Vector3i;
 
 public class World {
 
   private final Map<Long, Chunk> chunks = new HashMap<>();
+  private final static Map<ChunkCoords, ArrayList<QueuedBlock>> queue = new HashMap<>();
 
   public static final SimplexNoise NOISE = new SimplexNoise(WorldConsts.WORLD_SEED);
 
@@ -17,7 +17,7 @@ public class World {
     if(c != null) return c;
 
     c = new Chunk(new Vector3i(cx, 0, cz));
-    GenerateTerrain.fillChunk(c);
+    GenerateTerrain.fillChunk(c, this);
     chunks.put(key, c);
     return c;
   }
@@ -95,7 +95,36 @@ public class World {
     }
   }
 
-public Iterable<Chunk> getLoadedChunks() {
+  public Iterable<Chunk> getLoadedChunks() {
     return chunks.values();
+  }
+
+  public Chunk getChunkIfLoaded(int cx, int cz) {
+    return chunks.get(new ChunkCoords(cx, cz));
+  }
+
+  public void queueBlock(int wx, int wy, int wz, byte id) {
+    int cx = Math.floorDiv(wx, WorldConsts.CHUNK_SIZE);
+    int cz = Math.floorDiv(wz, WorldConsts.CHUNK_SIZE);
+
+    ChunkCoords cc = new ChunkCoords(cx, cz);
+    queue.computeIfAbsent(cc, k -> new ArrayList<>()).add(new QueuedBlock(wx, wy, wz, id));
+  }
+
+  public static void applyQueuedBlocks(Chunk chunk) {
+    ChunkCoords cc = new ChunkCoords(chunk.position.x, chunk.position.z);
+
+    ArrayList<QueuedBlock> list = queue.remove(cc);
+    if(list == null) return;
+
+    BlockMap map = chunk.getBlockMap();
+    for(QueuedBlock qb : list) {
+      int lx = Math.floorMod(qb.wx, WorldConsts.CHUNK_SIZE);
+      int lz = Math.floorMod(qb.wz, WorldConsts.CHUNK_SIZE);
+
+      if(qb.wy < 0 || qb.wy >= map.sizeY()) continue;
+      map.set(lx, qb.wy, lz, qb.id);
+    }
+    chunk.markDirty();
   }
 }
