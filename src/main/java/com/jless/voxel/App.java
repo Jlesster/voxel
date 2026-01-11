@@ -19,6 +19,8 @@ public class App {
   private UI ui;
   private World world;
   public Controller c;
+
+  private Texture atlas;
   private VoxelRender voxelRender;
   private RaycastHit currHit = null;
   private final EntityManager entityManager = new EntityManager();
@@ -97,7 +99,10 @@ public class App {
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
 
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, atlas.id);
       VoxelRender.render(world, projMatrix, c.getViewMatrix());
+      glBindTexture(GL_TEXTURE_2D, 0);
 
       if(currHit != null) {
         ui.drawOutline(currHit.block);
@@ -196,6 +201,10 @@ public class App {
     viewMatrix = new Matrix4f();
     modelMatrix = new Matrix4f();
     matrixBuffer = BufferUtils.createFloatBuffer(16);
+
+    atlas = Texture.loadResource("/Tileset.png", true);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, atlas.id);
 
     FloatBuffer lightColor = BufferUtils.createFloatBuffer(4);
     lightColor.put(new float[] {

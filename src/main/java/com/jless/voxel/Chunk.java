@@ -41,7 +41,7 @@ public class Chunk {
   }
 
   private FloatBuffer buildMeshBuffer(World w) {
-    int initFloats = 400_000;
+    int initFloats = 800_000;
     FloatBuffer buf = BufferUtils.createFloatBuffer(initFloats);
 
     BlockMap map = getBlockMap();
@@ -62,8 +62,7 @@ public class Chunk {
 
           for(int face = 0; face < 6; face++) {
             if(isFaceVisible(w, wx, y, wz, face)) {
-              float[] c = Blocks.COLOR[id];
-              count += emitFaceAsTriangles(buf, wx, y, wz, face, c);
+              count += emitFaceAsTriangles(buf, wx, y, wz, face, id);
             }
           }
         }
@@ -93,22 +92,24 @@ public class Chunk {
   }
 
   private int emitFaceAsTriangles(FloatBuffer b, int x, int y, int z, int face, byte blockID) {
-    int tx = 0;
-    int ty = 0;
 
-    if(blockID == BlockID.GRASS) {
-      if(face == Blocks.TEX_TOP[blockID]) { tx = 0; ty = 0; }
-      else if(face == Blocks.TEX_BOTTOM[blockID]) { tx = 2; ty = 0; }
-      else { tx = 1; ty = 0; }
-    }
+    int packedTile;
+    if(face == 2) packedTile = Blocks.TEX_TOP[blockID];
+    else if(face == 3) packedTile = Blocks.TEX_BOTTOM[blockID];
+    else packedTile = Blocks.TEX_SIDE[blockID];
 
     float[] uv = new float[4];
-    getTileUV(tx, ty, uv);
+    getTileUVPacked(packedTile, uv);
 
     float u0 = uv[0];
     float v0 = uv[1];
     float u1 = uv[2];
     float v1 = uv[3];
+
+    float au = 0, av = 0;
+    float bu = 0, bv = 0;
+    float cu = 0, cv = 0;
+    float du = 0, dv = 0;
 
     float nx = 0, ny = 0, nz = 0;
     float x0 = x, x1 = x + 1;
@@ -127,6 +128,11 @@ public class Chunk {
         bx = x1; by = y1; bz = z0;
         cx = x1; cy = y1; cz = z1;
         dx = x1; dy = y0; dz = z1;
+
+        au = u0; av = v0;
+        bu = u0; bv = v1;
+        cu = u1; cv = v1;
+        du = u1; dv = v0;
       }
       case 1 -> {
         nx = -1; ny = 0; nz = 0;
@@ -134,6 +140,11 @@ public class Chunk {
         bx = x0; by = y1; bz = z1;
         cx = x0; cy = y1; cz = z0;
         dx = x0; dy = y0; dz = z0;
+
+        au = u1; av = v0;
+        bu = u1; bv = v1;
+        cu = u0; cv = v1;
+        du = u0; dv = v0;
       }
       case 2 -> {
         nx = 0; ny = 1; nz = 0;
@@ -141,6 +152,11 @@ public class Chunk {
         bx = x1; by = y1; bz = z1;
         cx = x1; cy = y1; cz = z0;
         dx = x0; dy = y1; dz = z0;
+
+        au = u0; av = v1;
+        bu = u1; bv = v1;
+        cu = u1; cv = v0;
+        du = u0; dv = v0;
       }
       case 3 -> {
         nx = 0; ny = -1; nz = 0;
@@ -148,6 +164,11 @@ public class Chunk {
         bx = x1; by = y0; bz = z0;
         cx = x1; cy = y0; cz = z1;
         dx = x0; dy = y0; dz = z1;
+
+        au = u0; av = v0;
+        bu = u1; bv = v0;
+        cu = u1; cv = v1;
+        du = u0; dv = v1;
       }
       case 4 -> {
         nx = 0; ny = 0; nz = 1;
@@ -155,6 +176,11 @@ public class Chunk {
         bx = x1; by = y1; bz = z1;
         cx = x0; cy = y1; cz = z1;
         dx = x0; dy = y0; dz = z1;
+
+        au = u1; av = v0;
+        bu = u1; bv = v1;
+        cu = u0; cv = v1;
+        du = u0; dv = v0;
       }
       case 5 -> {
         nx = 0; ny = 0; nz = -1;
@@ -162,15 +188,20 @@ public class Chunk {
         bx = x0; by = y1; bz = z0;
         cx = x1; cy = y1; cz = z0;
         dx = x1; dy = y0; dz = z0;
+
+        au = u0; av = v0;
+        bu = u0; bv = v1;
+        cu = u1; cv = v1;
+        du = u1; dv = v0;
       }
     }
-    putV(b, ax, ay, az, nx, ny, nz, u0, v0);
-    putV(b, bx, by, bz, nx, ny, nz, u1, v0);
-    putV(b, cx, cy, cz, nx, ny, nz, u1, v1);
+    putV(b, ax, ay, az, nx, ny, nz, au, av);
+    putV(b, bx, by, bz, nx, ny, nz, bu, bv);
+    putV(b, cx, cy, cz, nx, ny, nz, cu, cv);
 
-    putV(b, ax, ay, az, nx, ny, nz, u0, v0);
-    putV(b, cx, cy, cz, nx, ny, nz, u1, v1);
-    putV(b, dx, dy, dz, nx, ny, nz, u0, v1);
+    putV(b, ax, ay, az, nx, ny, nz, au, av);
+    putV(b, cx, cy, cz, nx, ny, nz, cu, cv);
+    putV(b, dx, dy, dz, nx, ny, nz, du, dv);
 
     return 6;
   }
@@ -189,35 +220,39 @@ public class Chunk {
 
     glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
-    int stride = 9 * Float.BYTES;
+    int stride = 8 * Float.BYTES;
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glVertexPointer(3, GL_FLOAT, stride, 0L);
     glNormalPointer(GL_FLOAT, stride, 3L * Float.BYTES);
-    glColorPointer(3, GL_FLOAT, stride, 6L * Float.BYTES);
-    glTexCoordPointer(2, GL_FLOAT, stride, 4l * Float.BYTES);
+    glTexCoordPointer(2, GL_FLOAT, stride, 6l * Float.BYTES);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  private static void getTileUV(int tx, int ty, float[] out) {
-    float tileSize = 1.0f / 16.0f;
-    float u0 = tx * tileSize;
-    float v0 = ty * tileSize;
+  private static void getTileUVPacked(int packed, float[] out) {
+    int tx = BlockTexture.tileX(packed);
+    int ty = BlockTexture.tileY(packed);
 
-    float u1 = u0 + tileSize;
-    float v1 = v0 + tileSize;
+    float sx = 1.0f / BlockTexture.ATLAS_TILE_X;
+    float sy = 1.0f / BlockTexture.ATLAS_TILE_Y;
+
+    ty = (BlockTexture.ATLAS_TILE_Y - 1) - ty;
+
+    float u0 = tx * sx;
+    float v0 = ty * sy;
+
+    float u1 = u0 + sx;
+    float v1 = v0 + sy;
 
     out[0] = u0; out[1] = v0;
     out[2] = u1; out[3] = v1;

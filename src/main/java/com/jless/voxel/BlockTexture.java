@@ -4,7 +4,9 @@ public class BlockTexture {
 
   private BlockTexture() {}
 
-  public static final int ATLAS_TILES = 16;
+  public static final int TILE_SIZE_PX = 16;
+  public static final int ATLAS_TILE_X = 9;
+  public static final int ATLAS_TILE_Y = 2;
 
   public static int tile(int tx, int ty) {
     return (ty << 8) | tx;

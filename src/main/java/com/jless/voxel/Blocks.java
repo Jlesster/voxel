@@ -32,16 +32,16 @@ public class Blocks {
     TEX_SIDE[BlockID.STONE] = BlockTexture.tile(0, 0);
     TEX_BOTTOM[BlockID.STONE] = BlockTexture.tile(0, 0);
 
-    TEX_TOP[BlockID.DIRT] = BlockTexture.tile(4, 0);
-    TEX_SIDE[BlockID.DIRT] = BlockTexture.tile(4, 0);
-    TEX_BOTTOM[BlockID.DIRT] = BlockTexture.tile(4, 0);
+    TEX_TOP[BlockID.DIRT] = BlockTexture.tile(3, 0);
+    TEX_SIDE[BlockID.DIRT] = BlockTexture.tile(3, 0);
+    TEX_BOTTOM[BlockID.DIRT] = BlockTexture.tile(3, 0);
 
-    TEX_TOP[BlockID.LOG] = BlockTexture.tile(6, 1);
-    TEX_SIDE[BlockID.LOG] = BlockTexture.tile(5, 1);
-    TEX_BOTTOM[BlockID.LOG] = BlockTexture.tile(6, 1);
+    TEX_TOP[BlockID.LOG] = BlockTexture.tile(5, 1);
+    TEX_SIDE[BlockID.LOG] = BlockTexture.tile(4, 1);
+    TEX_BOTTOM[BlockID.LOG] = BlockTexture.tile(5, 1);
 
-    TEX_TOP[BlockID.LEAF] = BlockTexture.tile(5, 6);
-    TEX_SIDE[BlockID.LEAF] = BlockTexture.tile(5, 6);
-    TEX_BOTTOM[BlockID.LEAF] = BlockTexture.tile(5, 6);
+    TEX_TOP[BlockID.LEAF] = BlockTexture.tile(3, 1);
+    TEX_SIDE[BlockID.LEAF] = BlockTexture.tile(3, 1);
+    TEX_BOTTOM[BlockID.LEAF] = BlockTexture.tile(3, 1);
   }
 }
