@@ -52,6 +52,50 @@ public class VoxelRender {
     glEnable(GL_LIGHTING);
   }
 
+  public static void drawBox(float x0, float y0, float z0, float x1, float y1, float z1, float[] rgb) {
+    glColor3f(rgb[0], rgb[1], rgb[2]);
+
+    glBegin(GL_QUADS);
+
+    glNormal3f(1, 0, 0);
+    glVertex3f(x1, y0, z0);
+    glVertex3f(x1, y1, z0);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x1, y0, z1);
+
+    glNormal3f(-1, 0, 0);
+    glVertex3f(x0, y0, z1);
+    glVertex3f(x0, y1, z1);
+    glVertex3f(x0, y1, z1);
+    glVertex3f(x0, y0, z1);
+
+    glNormal3f(0, 1, 0);
+    glVertex3f(x0, y1, z0);
+    glVertex3f(x1, y1, z0);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x0, y1, z1);
+
+    glNormal3f(0, -1, 0);
+    glVertex3f(x0, y0, z1);
+    glVertex3f(x1, y0, z1);
+    glVertex3f(x1, y0, z0);
+    glVertex3f(x0, y0, z0);
+
+    glNormal3f(0, 0, 1);
+    glVertex3f(x0, y0, z1);
+    glVertex3f(x0, y1, z1);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x1, y0, z1);
+
+    glNormal3f(0, 0, -1);
+    glVertex3f(x0, y0, z0);
+    glVertex3f(x0, y1, z0);
+    glVertex3f(x1, y1, z0);
+    glVertex3f(x1, y0, z0);
+
+    glEnd();
+  }
+
   public static void debugVoxel(int x, int y, int z, float[] rgb) {
     glDisable(GL_LIGHTING);
     glDisable(GL_CULL_FACE);

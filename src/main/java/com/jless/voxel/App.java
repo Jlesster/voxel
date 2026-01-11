@@ -20,7 +20,7 @@ public class App {
   private World world;
   public Controller c;
 
-  private Texture atlas;
+  private TextureLoader atlas;
   private VoxelRender voxelRender;
   private RaycastHit currHit = null;
   private final EntityManager entityManager = new EntityManager();
@@ -76,7 +76,6 @@ public class App {
       boolean r = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 
       c.update(world, dt, jumpPressed, f, b, l, r);
-      entityManager.update(world, c.getPosition(), dt);
 
       currHit = VoxelRaycast.raycast(
         world,
@@ -103,6 +102,8 @@ public class App {
       glBindTexture(GL_TEXTURE_2D, atlas.id);
       VoxelRender.render(world, projMatrix, c.getViewMatrix());
       glBindTexture(GL_TEXTURE_2D, 0);
+
+      entityManager.update(world, c.getPosition(), dt);
 
       if(currHit != null) {
         ui.drawOutline(currHit.block);
@@ -202,7 +203,7 @@ public class App {
     modelMatrix = new Matrix4f();
     matrixBuffer = BufferUtils.createFloatBuffer(16);
 
-    atlas = Texture.loadResource("/Tileset.png", true);
+    atlas = TextureLoader.loadResource("/Tileset.png", true);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, atlas.id);
 

@@ -23,8 +23,8 @@ public class WorldConsts {
   public static final int TREE_MAX_HEIGHT = 6;
   public static final int TREE_CANOPY_RADS = 2;
 
-  public static final int MAX_ENTITIES = 4;
+  public static final int MAX_ENTITIES = 9;
   public static final float ENTITY_SPAWN_RADIUS = 20.0f;
-  public static final float ENTITY_DESPAWN_RADIUS = 70.0f;
+  public static final float ENTITY_DESPAWN_RADIUS = 90.0f;
   public static final float ENTITY_SPAWN_INTERVAL = 0.5f;
 }

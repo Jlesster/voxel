@@ -1,11 +1,18 @@
 package com.jless.voxel;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import org.joml.Vector3f;
 
 public class EntityPig extends Entity {
+  private static final float WIDTH = 0.8f;
+  private static final float HEIGHT = 1.6f;
 
   private float wanderTimer = 0f;
   private float idleTimer = 0f;
+  private float animTime = 0f;
+  private float yawDeg = 0f;
+  private float targetYaw = 0f;
 
   private final Vector3f wishDir = new Vector3f();
 
@@ -13,9 +20,45 @@ public class EntityPig extends Entity {
     pos.set(x, y, z);
   }
 
+  private float getGroundY(World world, float x, float z) {
+    float r = WIDTH * 0.5f;
+
+    int x0 = (int)Math.floor(x - r);
+    int x1 = (int)Math.floor(x + r);
+    int z0 = (int)Math.floor(z - r);
+    int z1 = (int)Math.floor(z + r);
+
+    int y00 = world.getSurfaceY(x0, z0);
+    int y10 = world.getSurfaceY(x1, z0);
+    int y01 = world.getSurfaceY(x0, z1);
+    int y11 = world.getSurfaceY(x1, z1);
+
+    int y = Math.max(Math.max(y00, y10), Math.max(y01, y11));
+    return y + 1.0f;
+  }
+
   @Override
   public void update(World world, float dt) {
     vel.y -= 20.0f * dt;
+    animTime += dt * 6.0f;
+    pos.x += vel.x * dt;
+    pos.y += vel.y * dt;
+    pos.z += vel.z * dt;
+
+    float dx = vel.x;
+    float dz = vel.z;
+    float moveSq = (dx * dx) + (dz * dz);
+    if(moveSq > 0.0001f) {
+      targetYaw = (float)Math.toDegrees(Math.atan2(-dx, -dz));
+    }
+
+    float turnSpeed = 180f;
+    float diff = wrapAngleDeg(targetYaw - yawDeg);
+    float maxTurn = turnSpeed * dt;
+    if(diff > maxTurn) diff = maxTurn;
+    if(diff < -maxTurn) diff = -maxTurn;
+
+    yawDeg = wrapAngleDeg(yawDeg + diff);
 
     if(idleTimer > 0f) {
       idleTimer -= dt;
@@ -33,42 +76,107 @@ public class EntityPig extends Entity {
       }
     }
 
+
     float speed = 2.0f;
     vel.x = wishDir.x * speed;
     vel.z = wishDir.z * speed;
 
-    pos.x += vel.x * dt;
-    pos.y += vel.y * dt;
-    pos.z += vel.z * dt;
+    float groundY = getGroundY(world, pos.x, pos.z);
 
-    int bx = (int)Math.floor(pos.x);
-    int by = (int)Math.floor(pos.y);
-    int bz = (int)Math.floor(pos.z);
-
-    byte below = world.getBlockWorld(bx, by, bz);
-    if(Blocks.SOLID[below] && vel.y < 0) {
-      pos.y = (float)by + 1.5f;
+    if(pos.y < groundY) {
+      pos.y = groundY;
       vel.y = 0;
-    }
-
-    byte inside = world.getBlockWorld(bx, by, bz);
-    if(Blocks.SOLID[inside]) {
-      pos.x -= vel.x * dt;
-      pos.z -= vel.z * dt;
-      wanderTimer = 0;
     }
   }
 
   @Override
   public void render(VoxelRender render) {
-    int px = (int)Math.floor(pos.x);
-    int py = (int)Math.floor(pos.y);
-    int pz = (int)Math.floor(pos.z);
+    glPushMatrix();
+    glTranslatef(pos.x, pos.y, pos.z);
+    glTranslatef(-0.5f, 0.0f, -1.0f);
+    glRotatef(yawDeg, 0f, 1f, 0f);
 
-    System.out.println("pig render at " + pos);
+    glScalef(0.7f, 0.7f, 0.7f);
 
-    VoxelRender.debugVoxel(px, py, pz, new float[]{1.0f, 0.6f, 0.8f});
-    VoxelRender.debugVoxel(px + 1, py, pz, new float[]{1.0f, 0.6f, 0.8f});
-    VoxelRender.debugVoxel(px + 2, py, pz, new float[]{1.0f, 0.5f, 0.7f});
+    glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+    glDisable(GL_LIGHTING);
+
+    float swing = (float) ((float)Math.sin(animTime) * 0.15);
+
+    float[] pink = new float[]{1.0f, 0.65f, 0.80f};
+    float[] pinkDark = new float[]{0.95f, 0.55f, 0.75f};
+    float[] leg = new float[]{0.9f, 0.5f, 0.7f};
+
+    //body
+    VoxelRender.drawBox(
+      0.0f, 0.9f, 0.0f,
+      1.0f, 1.6f, 2.0f,
+      pink
+    );
+
+    //head
+    VoxelRender.drawBox(
+      0.05f, 1.05f, -0.85f,
+      0.95f, 1.75f, 0.05f,
+      pink
+    );
+
+    //snout
+    VoxelRender.drawBox(
+      0.20f, 1.20f, -1.10f,
+      0.80f, 1.50f, -0.85f,
+      pinkDark
+    );
+
+    //legs
+    float lx0 = 0.10f, lx1= 0.35f;
+    float rx0 = 0.65f, rx1 = 0.90f;
+
+    float frontZ0 = 0.10f, frontZ1 = 0.35f;
+    float backZ0 = 1.65f, backZ1 = 1.90f;
+
+    float y0 = 0.0f;
+    float y1 = 0.9f;
+
+    //Front left
+    VoxelRender.drawBox(
+      lx0, y0, frontZ0 + swing,
+      lx1, y1, frontZ1 + swing,
+      leg
+    );
+
+    //front right
+    VoxelRender.drawBox(
+      rx0, y0, frontZ0 + swing,
+      rx1, y1, frontZ1 + swing,
+      leg
+    );
+
+    //back left
+    VoxelRender.drawBox(
+      lx0, y0, backZ0 - swing,
+      lx1, y1, backZ1 - swing,
+      leg
+    );
+
+    //back right
+    VoxelRender.drawBox(
+      rx0, y0, backZ0 - swing,
+      rx1, y1, backZ1 - swing,
+      leg
+    );
+
+    glPopAttrib();
+    glPopMatrix();
+  }
+
+  private static float wrapAngleDeg(float a) {
+    while(a >= 180f) a -= 360f;
+    while(a < -180f) a += 360f;
+    return a;
   }
 }

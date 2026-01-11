@@ -73,7 +73,7 @@ public class EntityManager {
       return;
     }
 
-    EntityPig pig = new EntityPig(ix + 0.5f, y + 1f, iz + 0.5f);
+    EntityPig pig = new EntityPig(ix + 0.5f, y + 2f, iz + 0.5f);
     entities.add(pig);
     System.out.println("pig spawned sucessfully");
   }
