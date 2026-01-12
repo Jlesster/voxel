@@ -64,8 +64,8 @@ public class VoxelRender {
     glVertex3f(x1, y0, z1);
 
     glNormal3f(-1, 0, 0);
-    glVertex3f(x0, y0, z1);
-    glVertex3f(x0, y1, z1);
+    glVertex3f(x1, y0, z1);
+    glVertex3f(x1, y1, z1);
     glVertex3f(x0, y1, z1);
     glVertex3f(x0, y0, z1);
 

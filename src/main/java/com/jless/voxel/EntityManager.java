@@ -25,9 +25,9 @@ public class EntityManager {
       float dist2 = (dx * dx) + (dz * dz);
 
       float despawn = WorldConsts.ENTITY_DESPAWN_RADIUS;
-      // if(dist2 > despawn * despawn) {
-      //   e.removed = true;
-      // }
+      if(dist2 > despawn * despawn) {
+        e.removed = true;
+      }
     }
 
     entities.removeIf(e -> e.removed);
@@ -57,29 +57,24 @@ public class EntityManager {
     int cx = Math.floorDiv(ix, WorldConsts.CHUNK_SIZE);
     int cz = Math.floorDiv(iz, WorldConsts.CHUNK_SIZE);
     if(world.getChunkIfLoaded(cx, cz) == null) {
-      System.out.println("chunk not loaded at " + cx + cz);
       return;
     }
 
     int y = world.getSurfaceY(ix, iz);
     if(y < 0) {
-      System.out.println("no surface found to spawn");
       return;
     }
 
     byte ground = world.getBlockWorld(ix, y, iz);
     if(ground != BlockID.GRASS) {
-      System.out.println("Spawn failed ground is " + ground + " not grass");
       return;
     }
 
-    EntityPig pig = new EntityPig(ix + 0.5f, y + 2f, iz + 0.5f);
+    EntityPig pig = new EntityPig(ix + 0.5f, y + 1f, iz + 0.5f);
     entities.add(pig);
-    System.out.println("pig spawned sucessfully");
   }
 
   public void render(VoxelRender render) {
-    System.out.println("entities.size = " + entities.size());
     for(Entity e : entities) {
       e.render(render);
     }

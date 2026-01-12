@@ -174,7 +174,7 @@ public class EntityPig extends Entity {
   public void render(VoxelRender render) {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, pos.z);
-    glTranslatef(-1.0f, 0.0f, -0.5f);
+    glTranslatef(-0.5f, 0.0f, -0.7f);
     glRotatef(yawDeg, 0f, 1f, 0f);
 
     glScalef(0.7f, 0.7f, 0.7f);

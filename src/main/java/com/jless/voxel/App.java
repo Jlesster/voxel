@@ -19,7 +19,7 @@ public class App {
   private UI ui;
   private World world;
   public Controller c;
-
+  private Chunk chunk;
   private TextureLoader atlas;
   private VoxelRender voxelRender;
   private RaycastHit currHit = null;
@@ -115,6 +115,7 @@ public class App {
 
       glfwSwapBuffers(window);
     }
+    cleanup();
   }
 
   private void loadMatrix(Matrix4f matrix, int mode) {
@@ -293,6 +294,7 @@ public class App {
   }
 
   private void cleanup() {
+    chunk.cleanup();
     glfwDestroyWindow(window);
     glfwTerminate();
   }
