@@ -37,7 +37,8 @@ public class EntityManager {
       spawnTimer = WorldConsts.ENTITY_SPAWN_INTERVAL;
 
       if(entities.size() < WorldConsts.MAX_ENTITIES) {
-        trySpawnPig(world, playerPos);
+        trySpawnPenguin(world, playerPos);
+        // trySpawnPig(world, playerPos);
       }
     }
   }
@@ -72,6 +73,38 @@ public class EntityManager {
 
     EntityPig pig = new EntityPig(ix + 0.5f, y + 1f, iz + 0.5f);
     entities.add(pig);
+  }
+
+  private void trySpawnPenguin(World world, Vector3f playerPos) {
+    float radius = WorldConsts.ENTITY_SPAWN_RADIUS;
+
+    float angle = (float)(Math.random() * Math.PI * 2);
+    float dist = (float)(Math.random() * radius);
+
+    float x = playerPos.x + (float)Math.cos(angle) * dist;
+    float z = playerPos.z + (float)Math.sin(angle) * dist;
+
+    int ix = (int)Math.floor(x);
+    int iz = (int)Math.floor(z);
+
+    int cx = Math.floorDiv(ix, WorldConsts.CHUNK_SIZE);
+    int cz = Math.floorDiv(iz, WorldConsts.CHUNK_SIZE);
+    if(world.getChunkIfLoaded(cx, cz) == null) {
+      return;
+    }
+
+    int y = world.getSurfaceY(ix, iz);
+    if(y < 0) {
+      return;
+    }
+
+    byte ground = world.getBlockWorld(ix, y, iz);
+    if(ground != BlockID.GRASS) {
+      return;
+    }
+
+    EntityPenguin penguin = new EntityPenguin(ix + 0.5f, y + 1f, iz + 0.5f);
+    entities.add(penguin);
   }
 
   public void render(VoxelRender render) {

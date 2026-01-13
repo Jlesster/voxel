@@ -4,7 +4,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 import org.joml.Vector3f;
 
-public class EntityPig extends Entity {
+public class EntityPenguin extends Entity {
   private static final float WIDTH = 0.8f;
   private static final float HEIGHT = 1.6f;
   private static final float LENGTH = 1.4f;
@@ -27,7 +27,7 @@ public class EntityPig extends Entity {
 
   private final Vector3f wishDir = new Vector3f();
 
-  public EntityPig(float x, float y, float z) {
+  public EntityPenguin(float x, float y, float z) {
     pos.set(x, y, z);
   }
 
@@ -288,28 +288,28 @@ public class EntityPig extends Entity {
 
     float swing = (float) ((float)Math.sin(animTime) * 0.15);
 
-    float[] pink = new float[]{1.0f, 0.65f, 0.80f};
-    float[] pinkDark = new float[]{0.95f, 0.55f, 0.75f};
+    float[] black = new float[]{0.10f, 0.10f, 0.10f};
+    float[] pinkDark = new float[]{0.75f, 0.75f, 0.00f};
     float[] leg = new float[]{0.9f, 0.5f, 0.7f};
 
     //body
     VoxelRender.drawBox(
-      0.0f, 0.9f, 0.0f,
-      1.0f, 1.6f, 2.0f,
-      pink
+      0.1f, 0.1f, 0.0f,
+      0.9f, 1.2f, 0.6f,
+      black
     );
 
     //head
     VoxelRender.drawBox(
-      0.05f, 1.05f, -0.85f,
-      0.95f, 1.75f, 0.05f,
-      pink
+      0.25f, 1.05f, -0.15f,
+      0.75f, 1.65f, 0.45f,
+      black
     );
 
     //snout
     VoxelRender.drawBox(
-      0.20f, 1.20f, -1.15f,
-      0.80f, 1.50f, -0.80f,
+      0.40f, 1.20f, -1.25f,
+      0.60f, 1.10f, -0.60f,
       pinkDark
     );
 
@@ -320,34 +320,34 @@ public class EntityPig extends Entity {
     float frontZ0 = 0.10f, frontZ1 = 0.35f;
     float backZ0 = 1.65f, backZ1 = 1.90f;
 
-    float y0 = 0.3f;
-    float y1 = 1.4f;
+    float y0 = 0.0f;
+    float y1 = 0.9f;
 
     //Front left
     VoxelRender.drawBox(
-      lx0, y0 - swing, frontZ0,
-      lx1, y1 - swing, frontZ1,
+      lx0, y0, frontZ0,
+      lx1, y1, frontZ1,
       leg
     );
 
     //front right
     VoxelRender.drawBox(
-      rx0, y0 + swing, frontZ0,
-      rx1, y1 + swing, frontZ1,
+      rx0, y0, frontZ0,
+      rx1, y1, frontZ1,
       leg
     );
 
     //back left
     VoxelRender.drawBox(
-      lx0, y0 + swing, backZ0,
-      lx1, y1 + swing, backZ1,
+      lx0, y0, backZ0,
+      lx1, y1, backZ1,
       leg
     );
 
     //back right
     VoxelRender.drawBox(
-      rx0, y0 - swing, backZ0,
-      rx1, y1 - swing, backZ1,
+      rx0, y0, backZ0,
+      rx1, y1, backZ1,
       leg
     );
 
