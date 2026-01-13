@@ -31,6 +31,10 @@ public class EntityPig extends Entity {
     pos.set(x, y, z);
   }
 
+  private boolean canStepTo(World world, float x, float y, float z) {
+    //TODO build this fucker
+  }
+
   private boolean resolveCollisions(World world) {
     boolean pushedUp = false;
 
@@ -42,11 +46,11 @@ public class EntityPig extends Entity {
     float az1 = getMaxZ(pos.z);
 
     int bx0 = (int)Math.floor(ax0);
-    int bx1 = (int)Math.floor(ax1);
+    int bx1 = (int)Math.floor(ax1 - FEET_EPS);
     int by0 = (int)Math.floor(ay0);
-    int by1 = (int)Math.floor(ay0);
+    int by1 = (int)Math.floor(ay1 - FEET_EPS);
     int bz0 = (int)Math.floor(az0);
-    int bz1 = (int)Math.floor(az1);
+    int bz1 = (int)Math.floor(az1 - FEET_EPS);
 
     if(by0 < 0) by0 = 0;
     if(by1 >= WorldConsts.WORLD_HEIGHT) by1 = WorldConsts.WORLD_HEIGHT - 1;
@@ -64,7 +68,7 @@ public class EntityPig extends Entity {
           float pz0 = bz;
           float pz1 = bz + 1.0f;
 
-          if(!aabbOverlap(ax0, ay0, az0, ax1, ay1, az1, bx0, by0, bz0, bx1, by1, bz1)) continue;
+          if(!aabbOverlap(ax0, ay0, az0, ax1, ay1, az1, px0, py0, pz0, px1, py1, pz1)) continue;
 
           float overlapX1 = ax1 - px0;
           float overlapX2 = px1 - ax0;
@@ -145,7 +149,7 @@ public class EntityPig extends Entity {
   }
 
   private int getWalkable(World world, int wx, int wz, int startY) {
-    if(startY >= WorldConsts.WORLD_HEIGHT) startY = WorldConsts.WORLD_HEIGHT;
+    if(startY >= WorldConsts.WORLD_HEIGHT) startY = WorldConsts.WORLD_HEIGHT - 1;
     if(startY < 0) startY = 0;
 
     for(int y = startY; y >= 0; y--) {
