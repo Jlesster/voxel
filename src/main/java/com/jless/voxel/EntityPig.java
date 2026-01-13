@@ -8,8 +8,16 @@ public class EntityPig extends Entity {
   private static final float WIDTH = 0.8f;
   private static final float HEIGHT = 1.6f;
   private static final float LENGTH = 1.4f;
-  private static final float STEP_HEIGHT = 1.1f;
+  private static final float STEP_HEIGHT = 0.6f;
   private static final float FEET_EPS = 0.001f;
+
+  private float getMinX(float x) { return x - (WIDTH * 0.5f); }
+  private float getMaxX(float x) { return x + (WIDTH * 0.5f); }
+  private float getMinZ(float z) { return z - (LENGTH * 0.5f); }
+  private float getMaxZ(float z) { return z + (LENGTH * 0.5f); }
+
+  private float getMinY(float yFeet) { return yFeet; }
+  private float getMaxY(float yFeet) { return yFeet + HEIGHT; }
 
   private float wanderTimer = 0f;
   private float idleTimer = 0f;
@@ -21,6 +29,88 @@ public class EntityPig extends Entity {
 
   public EntityPig(float x, float y, float z) {
     pos.set(x, y, z);
+  }
+
+  private boolean resolveCollisions(World world) {
+    boolean pushedUp = false;
+
+    float ax0 = getMinX(pos.x);
+    float ax1 = getMaxX(pos.x);
+    float ay0 = getMinY(pos.y);
+    float ay1 = getMaxY(pos.y);
+    float az0 = getMinZ(pos.z);
+    float az1 = getMaxZ(pos.z);
+
+    int bx0 = (int)Math.floor(ax0);
+    int bx1 = (int)Math.floor(ax1);
+    int by0 = (int)Math.floor(ay0);
+    int by1 = (int)Math.floor(ay0);
+    int bz0 = (int)Math.floor(az0);
+    int bz1 = (int)Math.floor(az1);
+
+    if(by0 < 0) by0 = 0;
+    if(by1 >= WorldConsts.WORLD_HEIGHT) by1 = WorldConsts.WORLD_HEIGHT - 1;
+
+    for(int bx = bx0; bx <= bx1; bx++) {
+      for(int by = by0; by <= by1; by++) {
+        for(int bz = bz0; bz <= bz1; bz++) {
+          byte id = world.get(bx, by, bz);
+          if(!Blocks.SOLID[id]) continue;
+
+          float px0 = bx;
+          float px1 = bx + 1.0f;
+          float py0 = by;
+          float py1 = by + 1.0f;
+          float pz0 = bz;
+          float pz1 = bz + 1.0f;
+
+          if(!aabbOverlap(ax0, ay0, az0, ax1, ay1, az1, bx0, by0, bz0, bx1, by1, bz1)) continue;
+
+          float overlapX1 = ax1 - px0;
+          float overlapX2 = px1 - ax0;
+          float pushX = (overlapX1 < overlapX2) ? -overlapX1 : overlapX2;
+
+          float overlapY1 = ay1 - py0;
+          float overlapY2 = py1 - ay0;
+          float pushY = (overlapY1 < overlapY2) ? -overlapY1 : overlapY2;
+
+          float overlapZ1 = az1 - pz0;
+          float overlapZ2 = pz1 - az0;
+          float pushZ = (overlapZ1 < overlapZ2) ? -overlapZ1 : overlapZ2;
+
+          float ax = Math.abs(pushX);
+          float ay = Math.abs(pushY);
+          float az = Math.abs(pushZ);
+
+          if(ax <= ay && ax <= az) {
+            pos.x += pushX;
+          } else if(az <= ax && az <= ay) {
+            pos.z += pushZ;
+          } else {
+            pos.y += pushY;
+            if(pushY > 0) pushedUp = true;
+            if(pushY > 0 && vel.y < 0) vel.y = 0;
+          }
+
+          ax0 = getMinX(pos.x);
+          ax1 = getMaxX(pos.x);
+          ay0 = getMinY(pos.y);
+          ay1 = getMaxY(pos.y);
+          az0 = getMinZ(pos.z);
+          az1 = getMaxZ(pos.z);
+        }
+      }
+    }
+    return pushedUp;
+  }
+
+  private static boolean aabbOverlap(
+    float ax0, float ay0, float az0, float ax1, float ay1, float az1,
+    float bx0, float by0, float bz0, float bx1, float by1, float bz1
+  ) {
+    return ax0 < bx1 && ax1 > bx0 &&
+           ay0 < by1 && ay1 > by0 &&
+           az0 < bz1 && az1 > bz0;
   }
 
   private boolean hitboxBlocked(World world, float x, float y, float z) {
@@ -40,6 +130,9 @@ public class EntityPig extends Entity {
     int by0 = (int)Math.floor(y + FEET_EPS);
     int by1 = (int)Math.floor(y + HEIGHT - FEET_EPS);
 
+    if(by0 < 0) by0 = 0;
+    if(by1 >= WorldConsts.WORLD_HEIGHT) by1 = WorldConsts.WORLD_HEIGHT - 1;
+
     for(int bx = bx0; bx <= bx1; bx++) {
       for(int by = by0; by <= by1; by++) {
         for(int bz = bz0; bz <= bz1; bz++) {
@@ -51,8 +144,11 @@ public class EntityPig extends Entity {
     return false;
   }
 
-  private int getWalkable(World world, int wx, int wz) {
-    for(int y = WorldConsts.WORLD_HEIGHT - 1; y >= 0; y--) {
+  private int getWalkable(World world, int wx, int wz, int startY) {
+    if(startY >= WorldConsts.WORLD_HEIGHT) startY = WorldConsts.WORLD_HEIGHT;
+    if(startY < 0) startY = 0;
+
+    for(int y = startY; y >= 0; y--) {
       byte id = world.getBlockWorld(wx, y, wz);
       if(id == BlockID.AIR) continue;
       if(id == BlockID.LEAF) continue;
@@ -65,15 +161,16 @@ public class EntityPig extends Entity {
     float rx = WIDTH * 0.5f;
     float rz = LENGTH * 0.5f;
 
+    int startY = (int)Math.floor(pos.y + 2.0f);
     int x0 = (int)Math.floor(x - rx);
     int x1 = (int)Math.floor(x + rx);
     int z0 = (int)Math.floor(z - rz);
     int z1 = (int)Math.floor(z + rz);
 
-    int y00 = getWalkable(world, x0, z0);
-    int y10 = getWalkable(world, x1, z0);
-    int y01 = getWalkable(world, x0, z1);
-    int y11 = getWalkable(world, x1, z1);
+    int y00 = getWalkable(world, x0, z0, startY);
+    int y10 = getWalkable(world, x1, z0, startY);
+    int y01 = getWalkable(world, x0, z1, startY);
+    int y11 = getWalkable(world, x1, z1, startY);
 
     int y = Math.min(Math.min(y00, y10), Math.min(y01, y11));
     return y + 1.0f;
@@ -108,46 +205,44 @@ public class EntityPig extends Entity {
     //collision jumping
     float dx = vel.x * dt;
     float dz = vel.z * dt;
-    float nx = pos.x + dx;
-    float nz = pos.z + dz;
     boolean stepped = false;
 
-    if(!hitboxBlocked(world, nx, pos.y, nz)) {
+    float nx = pos.x + dx;
+    if(!hitboxBlocked(world, nx, pos.y, pos.z)) {
       pos.x = nx;
-      pos.z = nz;
     } else {
       float stepY = pos.y + STEP_HEIGHT;
-      if(!hitboxBlocked(world, nx, stepY, nz)) {
+      if(!hitboxBlocked(world, nx, stepY, pos.z)) {
         float groundAfterStep = getGroundY(world, nx, pos.z);
 
-        if(groundAfterStep > pos.y && groundAfterStep <= pos.y + STEP_HEIGHT + 0.01f) {
+        if(groundAfterStep > pos.y && groundAfterStep <= pos.y + STEP_HEIGHT + 0.01) {
           pos.y = groundAfterStep;
           pos.x = nx;
-          pos.z = nz;
           vel.y = 0;
           stepped = true;
-        } else {
-          vel.x = 0;
-          vel.z = 0;
         }
-      } else {
-        vel.x = 0;
-        vel.z = 0;
       }
     }
+
+    float nz = pos.z + dz;
     if(!hitboxBlocked(world, pos.x, pos.y, nz)) {
       pos.z = nz;
     } else {
       float stepY = pos.y + STEP_HEIGHT;
       if(!hitboxBlocked(world, pos.x, stepY, nz)) {
         float groundAfterStep = getGroundY(world, pos.x, nz);
-        if(groundAfterStep > pos.y && groundAfterStep <= pos.y + STEP_HEIGHT + 0.01f) {
+
+        if(groundAfterStep > pos.y && groundAfterStep <= pos.y + STEP_HEIGHT) {
           pos.y = groundAfterStep;
           pos.z = nz;
           vel.y = 0;
+          stepped = true;
         }
       }
     }
+
+    boolean pushedUp = resolveCollisions(world);
+    if(pushedUp) stepped = true;
 
     if(!stepped) {
       float groundY = getGroundY(world, pos.x, pos.z);
@@ -174,8 +269,8 @@ public class EntityPig extends Entity {
   public void render(VoxelRender render) {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, pos.z);
-    glTranslatef(-0.5f, 0.0f, -0.7f);
     glRotatef(yawDeg, 0f, 1f, 0f);
+    glTranslatef(-0.5f, 0.0f, -0.7f);
 
     glScalef(0.7f, 0.7f, 0.7f);
 
