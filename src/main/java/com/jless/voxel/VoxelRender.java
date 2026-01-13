@@ -57,36 +57,42 @@ public class VoxelRender {
 
     glBegin(GL_QUADS);
 
+    //r
     glNormal3f(1, 0, 0);
     glVertex3f(x1, y0, z0);
     glVertex3f(x1, y1, z0);
     glVertex3f(x1, y1, z1);
     glVertex3f(x1, y0, z1);
 
+    //l
     glNormal3f(-1, 0, 0);
-    glVertex3f(x1, y0, z1);
-    glVertex3f(x1, y1, z1);
-    glVertex3f(x0, y1, z1);
     glVertex3f(x0, y0, z1);
+    glVertex3f(x0, y1, z1);
+    glVertex3f(x0, y1, z0);
+    glVertex3f(x0, y0, z0);
 
+    //t
     glNormal3f(0, 1, 0);
     glVertex3f(x0, y1, z0);
     glVertex3f(x1, y1, z0);
     glVertex3f(x1, y1, z1);
     glVertex3f(x0, y1, z1);
 
+    //b
     glNormal3f(0, -1, 0);
     glVertex3f(x0, y0, z1);
     glVertex3f(x1, y0, z1);
     glVertex3f(x1, y0, z0);
     glVertex3f(x0, y0, z0);
 
+    //f
     glNormal3f(0, 0, 1);
     glVertex3f(x0, y0, z1);
     glVertex3f(x0, y1, z1);
     glVertex3f(x1, y1, z1);
     glVertex3f(x1, y0, z1);
 
+    //ba
     glNormal3f(0, 0, -1);
     glVertex3f(x0, y0, z0);
     glVertex3f(x0, y1, z0);

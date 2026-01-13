@@ -33,6 +33,7 @@ public class EntityPig extends Entity {
 
   private boolean canStepTo(World world, float x, float y, float z) {
     //TODO build this fucker
+    return canStepTo(world, x, y, z);
   }
 
   private boolean resolveCollisions(World world) {
@@ -307,8 +308,8 @@ public class EntityPig extends Entity {
 
     //snout
     VoxelRender.drawBox(
-      0.20f, 1.20f, -1.10f,
-      0.80f, 1.50f, -0.85f,
+      0.20f, 1.20f, -1.15f,
+      0.80f, 1.50f, -0.80f,
       pinkDark
     );
 
