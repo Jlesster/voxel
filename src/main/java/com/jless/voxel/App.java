@@ -2,6 +2,7 @@ package com.jless.voxel;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 import java.nio.FloatBuffer;
@@ -99,21 +100,33 @@ public class App {
       glDisable(GL_LIGHTING);
       glColorMask(false, false, false, false);
 
-      VoxelRender.render(world, lighting.getLightSpaceMatrix(), new Matrix4f());
+      VoxelRender.render(world, lighting.getLightSpaceMatrix(), new Matrix4f(), null, atlas);
 
       glColorMask(true, true, true, true);
       glEnable(GL_LIGHTING);
 
       lighting.endShadowPass(wWidth, wHeight);
 
-      loadMatrix(projMatrix, GL_PROJECTION);
-      loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
+      viewMatrix = c.getViewMatrix();
 
-      lighting.applyLighting();
+      if(!VoxelRender.isShadersInit()) {
+        loadMatrix(projMatrix, GL_PROJECTION);
+        loadMatrix(viewMatrix, GL_MODELVIEW);
+      }
 
+      glActiveTexture(GL_TEXTURE0);
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, atlas.id);
-      VoxelRender.render(world, projMatrix, c.getViewMatrix());
+
+      glActiveTexture(GL_TEXTURE1);
+      glEnable(GL_TEXTURE_2D);
+      lighting.bindShadowMap(1);
+
+      VoxelRender.render(world, projMatrix, c.getViewMatrix(), lighting, atlas);
+
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, 0);
 
       entityManager.update(world, c.getPosition(), dt);
@@ -211,6 +224,8 @@ public class App {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     lighting = new Lighting();
+    lighting.initShadowMapping();
+    VoxelRender.initShaders();
     Vector3f sky = lighting.getSkyColor();
     glClearColor(sky.x, sky.y, sky.z, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

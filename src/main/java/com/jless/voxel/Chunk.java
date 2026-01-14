@@ -2,6 +2,7 @@ package com.jless.voxel;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
 
 import java.nio.FloatBuffer;
 
@@ -222,19 +223,19 @@ public class Chunk {
 
     int stride = 8 * Float.BYTES;
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
-    glVertexPointer(3, GL_FLOAT, stride, 0L);
-    glNormalPointer(GL_FLOAT, stride, 3L * Float.BYTES);
-    glTexCoordPointer(2, GL_FLOAT, stride, 6l * Float.BYTES);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L);
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, 3L * Float.BYTES);
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, stride, 6L * Float.BYTES);
 
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }

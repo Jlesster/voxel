@@ -1,7 +1,6 @@
 package com.jless.voxel;
 
-import static org.lwjgl.opengl.GL11.*;
-
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class EntityPenguin extends Entity {
@@ -29,11 +28,6 @@ public class EntityPenguin extends Entity {
 
   public EntityPenguin(float x, float y, float z) {
     pos.set(x, y, z);
-  }
-
-  private boolean canStepTo(World world, float x, float y, float z) {
-    //TODO build this fucker
-    return canStepTo(world, x, y, z);
   }
 
   private boolean resolveCollisions(World world) {
@@ -272,19 +266,11 @@ public class EntityPenguin extends Entity {
 
   @Override
   public void render(VoxelRender render) {
-    glPushMatrix();
-    glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(yawDeg, 0f, 1f, 0f);
-    glTranslatef(-0.5f, 0.0f, -0.7f);
-
-    glScalef(0.7f, 0.7f, 0.7f);
-
-    glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-    glDisable(GL_LIGHTING);
+  Matrix4f entityModel = new Matrix4f()
+      .translate(pos.x, pos.y, pos.z)
+      .rotateY((float)Math.toRadians(yawDeg))
+      .translate(-0.5f, 0.0f, -0.7f)
+      .scale(0.7f);
 
     float swing = (float) ((float)Math.sin(animTime) * 0.15);
 
@@ -293,24 +279,27 @@ public class EntityPenguin extends Entity {
     float[] leg = new float[]{0.9f, 0.9f, 0.9f};
 
     //body
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.1f, 0.1f, 0.0f,
       0.9f, 1.2f, 0.6f,
-      black
+      black,
+      entityModel
     );
 
     //head
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.25f, 1.05f, -0.15f,
       0.75f, 1.65f, 0.45f,
-      black
+      black,
+      entityModel
     );
 
     //snout
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.40f, 1.20f, -0.35f,
       0.60f, 1.10f, 0.20f,
-      yellow
+      yellow,
+      entityModel
     );
 
     //legs
@@ -324,35 +313,37 @@ public class EntityPenguin extends Entity {
     float y1 = 0.9f;
 
     //Front left
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       lx0, y0, frontZ0,
       lx1, y1, frontZ1,
-      leg
+      leg,
+      entityModel
     );
 
     //front right
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       rx0, y0, frontZ0,
       rx1, y1, frontZ1,
-      leg
+      leg,
+      entityModel
     );
 
     //back left
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       lx0 + 0.05f, y0 - 0.2f, backZ0,
       lx1 + 0.05f, y1 - 0.6f, backZ1,
-      yellow
+      yellow,
+      entityModel
     );
 
     //back right
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       rx0 + 0.30f, y0 - 0.2f, backZ0,
       rx1 - 0.30f, y1 - 0.6f, backZ1,
-      yellow
+      yellow,
+      entityModel
     );
 
-    glPopAttrib();
-    glPopMatrix();
   }
 
   private static float wrapAngleDeg(float a) {

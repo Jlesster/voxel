@@ -28,10 +28,10 @@ public class WorldConsts {
   public static final float ENTITY_DESPAWN_RADIUS = 120.0f;
   public static final float ENTITY_SPAWN_INTERVAL = 0.5f;
 
-  public static final float DAY_LENGTH = 240.0f; //4 mins
-  public static final float AMBIENT_DAY = 0.6f;
+  public static final float DAY_LENGTH = 120.0f; //4 mins
+  public static final float AMBIENT_DAY = 0.4f;
   public static final float AMBIENT_NIGHT = 0.15f;
 
   public static final int SHADOW_MAP_SIZE = 2048;
-  public static final float SHADOW_DISTANCE = 80.0f;
+  public static final float SHADOW_DISTANCE = 150.0f;
 }

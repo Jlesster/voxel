@@ -39,6 +39,7 @@ public class EntityManager {
       if(entities.size() < WorldConsts.MAX_ENTITIES) {
         trySpawnPenguin(world, playerPos);
         trySpawnPig(world, playerPos);
+        System.out.println(entities.size());
       }
     }
   }
@@ -106,6 +107,8 @@ public class EntityManager {
     EntityPenguin penguin = new EntityPenguin(ix + 0.5f, y + 1f, iz + 0.5f);
     entities.add(penguin);
   }
+
+
 
   public void render(VoxelRender render) {
     for(Entity e : entities) {

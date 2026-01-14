@@ -15,6 +15,7 @@
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/App.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Chunk.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/NativeLoader.java
+/home/jless/code/java/Voxel/src/main/java/com/jless/voxel/Shaders.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/VoxelCuller.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/EntityManager.java
 /home/jless/code/java/Voxel/src/main/java/com/jless/voxel/VoxelRender.java
