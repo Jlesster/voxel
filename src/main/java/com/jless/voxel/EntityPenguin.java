@@ -266,11 +266,11 @@ public class EntityPenguin extends Entity {
 
   @Override
   public void render(VoxelRender render) {
-  Matrix4f entityModel = new Matrix4f()
-      .translate(pos.x, pos.y, pos.z)
-      .rotateY((float)Math.toRadians(yawDeg))
-      .translate(-0.5f, 0.0f, -0.7f)
-      .scale(0.7f);
+    Matrix4f entityModel = new Matrix4f()
+        .translate(pos.x, pos.y, pos.z)
+        .rotateY((float)Math.toRadians(yawDeg))
+        .translate(-0.5f, 0.0f, -0.7f)
+        .scale(0.7f);
 
     float swing = (float) ((float)Math.sin(animTime) * 0.15);
 

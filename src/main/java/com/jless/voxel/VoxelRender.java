@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 import org.joml.*;
+import org.joml.Math;
 
 public class VoxelRender {
   private static final FrustumIntersection frustum = new FrustumIntersection();
@@ -278,7 +279,18 @@ public class VoxelRender {
     Matrix4f entityModel
   ) {
     initEntityMesh();
-    Matrix4f boxModel = new Matrix4f(entityModel).translate(x0, y0, z0).scale(x1 - x0, y1 - y0, z1 - z0);
+    float minX = Math.min(x0, x1);
+    float maxX = Math.max(x0, x1);
+
+    float minY = Math.min(y0, y1);
+    float maxY = Math.max(y0, y1);
+
+    float minZ = Math.min(z0, z1);
+    float maxZ = Math.max(z0, z1);
+
+    Matrix4f boxModel = new Matrix4f(entityModel)
+      .translate(minX, minY, minZ)
+      .scale(maxX - minX, maxY - minY, maxZ - minZ);
 
     shaders.setUniformMatrix4f("modelMatrix", boxModel);
     shaders.setUniformInt("useSolidColor", 1);

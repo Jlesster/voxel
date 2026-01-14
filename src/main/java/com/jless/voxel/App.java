@@ -105,6 +105,7 @@ public class App {
       glColorMask(true, true, true, true);
       glEnable(GL_LIGHTING);
 
+
       lighting.endShadowPass(wWidth, wHeight);
 
       viewMatrix = c.getViewMatrix();
