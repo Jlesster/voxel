@@ -11,8 +11,8 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
-import org.joml.Matrix4f;
-import org.joml.Vector3i;
+import org.joml.*;
+import org.joml.Math;
 
 
 public class App {
@@ -20,6 +20,7 @@ public class App {
   private World world;
   public Controller c;
   private Chunk chunk;
+  private Lighting lighting;
   private TextureLoader atlas;
   private VoxelRender voxelRender;
   private RaycastHit currHit = null;
@@ -70,6 +71,8 @@ public class App {
       glfwPollEvents();
       processInput();
 
+      lighting.update(dt);
+
       boolean f = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
       boolean b = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
       boolean l = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
@@ -86,17 +89,27 @@ public class App {
 
       blockManip();
 
-      FloatBuffer lightPos = BufferUtils.createFloatBuffer(4);
-      lightPos.put(new float[] {
-        0.5f, 1.0f, 0.3f, 0.0f //dir light
-      }).flip();
-
-      glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
+      Vector3f sky = lighting.getSkyColor();
+      glClearColor(sky.x, sky.y, sky.z, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      lighting.beginShadowPass(c.getPosition());
+
+      glDisable(GL_TEXTURE_2D);
+      glDisable(GL_LIGHTING);
+      glColorMask(false, false, false, false);
+
+      VoxelRender.render(world, lighting.getLightSpaceMatrix(), new Matrix4f());
+
+      glColorMask(true, true, true, true);
+      glEnable(GL_LIGHTING);
+
+      lighting.endShadowPass(wWidth, wHeight);
 
       loadMatrix(projMatrix, GL_PROJECTION);
       loadMatrix(c.getViewMatrix(), GL_MODELVIEW);
+
+      lighting.applyLighting();
 
       glEnable(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, atlas.id);
@@ -197,7 +210,10 @@ public class App {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.5f, 0.7f, 1.0f, 0.8f);
+    lighting = new Lighting();
+    Vector3f sky = lighting.getSkyColor();
+    glClearColor(sky.x, sky.y, sky.z, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     projMatrix = new Matrix4f();
     viewMatrix = new Matrix4f();
@@ -208,12 +224,7 @@ public class App {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, atlas.id);
 
-    FloatBuffer lightColor = BufferUtils.createFloatBuffer(4);
-    lightColor.put(new float[] {
-      1.0f, 1.0f, 1.0f, 1.0f
-    }).flip();
-
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+    lighting.initShadowMapping();
 
     updateProjectionMatrix(wWidth, wHeight);
 
@@ -294,6 +305,7 @@ public class App {
   }
 
   private void cleanup() {
+    lighting.cleanup();
     chunk.cleanup();
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -301,6 +313,13 @@ public class App {
 
   private void processInput() {
     jumpPressed = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+
+    if(glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+      lighting.setTimeOfDay(lighting.getTimeOfDay() + 0.01f);
+    }
+    if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+      lighting.setTimeOfDay(lighting.getTimeOfDay() - 0.01f);
+    }
   }
 
   private void setupMouse() {

@@ -38,7 +38,7 @@ public class EntityManager {
 
       if(entities.size() < WorldConsts.MAX_ENTITIES) {
         trySpawnPenguin(world, playerPos);
-        // trySpawnPig(world, playerPos);
+        trySpawnPig(world, playerPos);
       }
     }
   }

@@ -289,8 +289,8 @@ public class EntityPenguin extends Entity {
     float swing = (float) ((float)Math.sin(animTime) * 0.15);
 
     float[] black = new float[]{0.10f, 0.10f, 0.10f};
-    float[] pinkDark = new float[]{0.75f, 0.75f, 0.00f};
-    float[] leg = new float[]{0.9f, 0.5f, 0.7f};
+    float[] yellow = new float[]{0.75f, 0.75f, 0.00f};
+    float[] leg = new float[]{0.9f, 0.9f, 0.9f};
 
     //body
     VoxelRender.drawBox(
@@ -308,19 +308,19 @@ public class EntityPenguin extends Entity {
 
     //snout
     VoxelRender.drawBox(
-      0.40f, 1.20f, -1.25f,
-      0.60f, 1.10f, -0.60f,
-      pinkDark
+      0.40f, 1.20f, -0.35f,
+      0.60f, 1.10f, 0.20f,
+      yellow
     );
 
     //legs
-    float lx0 = 0.10f, lx1= 0.35f;
-    float rx0 = 0.65f, rx1 = 0.90f;
+    float lx0 = -0.00f, lx1= 0.25f;
+    float rx0 = 0.65f, rx1 = 1.00f;
 
-    float frontZ0 = 0.10f, frontZ1 = 0.35f;
-    float backZ0 = 1.65f, backZ1 = 1.90f;
+    float frontZ0 = 0.45f, frontZ1 = 0.20f;
+    float backZ0 = 0.45f, backZ1 = - 0.05f;
 
-    float y0 = 0.0f;
+    float y0 = 0.3f;
     float y1 = 0.9f;
 
     //Front left
@@ -339,16 +339,16 @@ public class EntityPenguin extends Entity {
 
     //back left
     VoxelRender.drawBox(
-      lx0, y0, backZ0,
-      lx1, y1, backZ1,
-      leg
+      lx0 + 0.05f, y0 - 0.2f, backZ0,
+      lx1 + 0.05f, y1 - 0.6f, backZ1,
+      yellow
     );
 
     //back right
     VoxelRender.drawBox(
-      rx0, y0, backZ0,
-      rx1, y1, backZ1,
-      leg
+      rx0 + 0.30f, y0 - 0.2f, backZ0,
+      rx1 - 0.30f, y1 - 0.6f, backZ1,
+      yellow
     );
 
     glPopAttrib();
