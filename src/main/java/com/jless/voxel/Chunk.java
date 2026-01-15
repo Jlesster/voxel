@@ -97,6 +97,7 @@ public class Chunk {
     int packedTile;
     if(face == 2) packedTile = Blocks.TEX_TOP[blockID];
     else if(face == 3) packedTile = Blocks.TEX_BOTTOM[blockID];
+    else if(face == 1) packedTile = Blocks.TEX_FRONT[blockID];
     else packedTile = Blocks.TEX_SIDE[blockID];
 
     float[] uv = new float[4];

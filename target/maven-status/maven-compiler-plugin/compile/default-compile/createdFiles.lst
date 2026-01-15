@@ -13,15 +13,15 @@ com/jless/voxel/Controller.class
 com/jless/voxel/VoxelCuller.class
 com/jless/voxel/App.class
 com/jless/voxel/EntityManager.class
-com/jless/voxel/VoxelRender.class
 com/jless/voxel/World.class
 com/jless/voxel/BlockMap.class
+com/jless/voxel/VoxelRender.class
 com/jless/voxel/SimplexNoise.class
 com/jless/voxel/QueuedBlock.class
 com/jless/voxel/UI.class
 com/jless/voxel/Lighting.class
 com/jless/voxel/WorldConsts.class
-com/jless/voxel/EntityPenguin.class
 com/jless/voxel/GenerateTerrain.class
+com/jless/voxel/EntityPenguin.class
 com/jless/voxel/NativeLoader.class
 com/jless/voxel/BlockID.class

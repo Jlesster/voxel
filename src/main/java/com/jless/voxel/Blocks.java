@@ -7,6 +7,7 @@ public class Blocks {
   public static final float[][] COLOR = new float[256][3];
   public static final int[] TEX_TOP = new int[256];
   public static final int[] TEX_SIDE = new int[256];
+  public static final int[] TEX_FRONT = new int[256];
   public static final int[] TEX_BOTTOM = new int[256];
 
   static {
@@ -14,6 +15,11 @@ public class Blocks {
     SOLID[BlockID.GRASS] = true;
     SOLID[BlockID.DIRT] = true;
     SOLID[BlockID.STONE] = true;
+    SOLID[BlockID.COBBLE] = true;
+    SOLID[BlockID.PLANK] = true;
+    SOLID[BlockID.BEDROCK] = true;
+    SOLID[BlockID.SAND] = true;
+    SOLID[BlockID.CHEST] = true;
 
     SOLID[BlockID.LOG] = true;
     SOLID[BlockID.LEAF] = true;
@@ -26,22 +32,52 @@ public class Blocks {
 
     TEX_TOP[BlockID.GRASS] = BlockTexture.tile(1, 0);
     TEX_SIDE[BlockID.GRASS] = BlockTexture.tile(2, 0);
+    TEX_FRONT[BlockID.GRASS] = BlockTexture.tile(2, 0);
     TEX_BOTTOM[BlockID.GRASS] = BlockTexture.tile(3, 0);
 
     TEX_TOP[BlockID.STONE] = BlockTexture.tile(0, 0);
     TEX_SIDE[BlockID.STONE] = BlockTexture.tile(0, 0);
+    TEX_FRONT[BlockID.STONE] = BlockTexture.tile(0, 0);
     TEX_BOTTOM[BlockID.STONE] = BlockTexture.tile(0, 0);
 
     TEX_TOP[BlockID.DIRT] = BlockTexture.tile(3, 0);
     TEX_SIDE[BlockID.DIRT] = BlockTexture.tile(3, 0);
+    TEX_FRONT[BlockID.DIRT] = BlockTexture.tile(2, 0);
     TEX_BOTTOM[BlockID.DIRT] = BlockTexture.tile(3, 0);
 
     TEX_TOP[BlockID.LOG] = BlockTexture.tile(5, 1);
     TEX_SIDE[BlockID.LOG] = BlockTexture.tile(4, 1);
+    TEX_FRONT[BlockID.LOG] = BlockTexture.tile(4, 1);
     TEX_BOTTOM[BlockID.LOG] = BlockTexture.tile(5, 1);
 
     TEX_TOP[BlockID.LEAF] = BlockTexture.tile(3, 1);
     TEX_SIDE[BlockID.LEAF] = BlockTexture.tile(3, 1);
+    TEX_FRONT[BlockID.LEAF] = BlockTexture.tile(3, 1);
     TEX_BOTTOM[BlockID.LEAF] = BlockTexture.tile(3, 1);
+
+    TEX_TOP[BlockID.COBBLE] = BlockTexture.tile(0, 1);
+    TEX_SIDE[BlockID.COBBLE] = BlockTexture.tile(0, 1);
+    TEX_FRONT[BlockID.COBBLE] = BlockTexture.tile(0, 1);
+    TEX_BOTTOM[BlockID.COBBLE] = BlockTexture.tile(0, 1);
+
+    TEX_TOP[BlockID.SAND] = BlockTexture.tile(2, 1);
+    TEX_SIDE[BlockID.SAND] = BlockTexture.tile(2, 1);
+    TEX_FRONT[BlockID.SAND] = BlockTexture.tile(2, 1);
+    TEX_BOTTOM[BlockID.SAND] = BlockTexture.tile(2, 1);
+
+    TEX_TOP[BlockID.PLANK] = BlockTexture.tile(4, 0);
+    TEX_SIDE[BlockID.PLANK] = BlockTexture.tile(4, 0);
+    TEX_FRONT[BlockID.PLANK] = BlockTexture.tile(4, 0);
+    TEX_BOTTOM[BlockID.PLANK] = BlockTexture.tile(4, 0);
+
+    TEX_TOP[BlockID.CHEST] = BlockTexture.tile(6, 1);
+    TEX_SIDE[BlockID.CHEST] = BlockTexture.tile(7, 1);
+    TEX_FRONT[BlockID.CHEST] = BlockTexture.tile(8, 1);
+    TEX_BOTTOM[BlockID.CHEST] = BlockTexture.tile(6, 1);
+
+    TEX_TOP[BlockID.BEDROCK] = BlockTexture.tile(1, 1);
+    TEX_SIDE[BlockID.BEDROCK] = BlockTexture.tile(1, 1);
+    TEX_FRONT[BlockID.BEDROCK] = BlockTexture.tile(1, 1);
+    TEX_BOTTOM[BlockID.BEDROCK] = BlockTexture.tile(1, 1);
   }
 }

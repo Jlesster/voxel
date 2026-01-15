@@ -14,6 +14,8 @@ public class Controller {
   private float yaw;
   private float roll;
 
+  private Inventory inventory;
+
   private static final float WIDTH = 0.6f;
   private static final float HEIGHT = 1.8f;
 
@@ -38,6 +40,10 @@ public class Controller {
     yaw = 0;
     roll = 0;
     viewMatrix = new Matrix4f();
+  }
+
+  public Inventory getInventory() {
+    return inventory;
   }
 
   public Matrix4f getViewMatrix() {

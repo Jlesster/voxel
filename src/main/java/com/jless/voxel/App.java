@@ -26,6 +26,7 @@ public class App {
   private VoxelRender voxelRender;
   private RaycastHit currHit = null;
   private final EntityManager entityManager = new EntityManager();
+  private final Inventory inv = new Inventory(9);
 
   private Matrix4f projMatrix;
   private Matrix4f viewMatrix;
@@ -190,7 +191,13 @@ public class App {
       }
     });
 
+    glfwSetScrollCallback(window, (w, xoff, yoff) -> {
+      if(yoff > 0) inv.scroll(-1);
+      if(yoff < 0) inv.scroll(1);
+    });
+
     glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+      System.out.println("Key: " + key + ", Scancode: " + scancode);
       if(key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
         glfwSetWindowShouldClose(window, true);
       }
@@ -198,6 +205,13 @@ public class App {
       if(key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         firstMouse = true;
+      }
+
+      if(action == GLFW_PRESS) {
+        if(key >= GLFW_KEY_1 && key <= GLFW_KEY_9) {
+          int slot = key - GLFW_KEY_1;
+          inv.selectSlot(slot);
+        }
       }
     });
   }
@@ -290,6 +304,7 @@ public class App {
 
     if(placeReq) {
       placeReq = false;
+      byte placeID = inv.getSelectedBlock();
 
       RaycastHit hit = VoxelRaycast.raycast(world,
         c.getEyePos(),
@@ -304,7 +319,7 @@ public class App {
             p.x,
             p.y,
             p.z,
-            BlockID.STONE
+            placeID
           );
         }
       }

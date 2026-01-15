@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 
 public class EntityPig extends Entity {
   private static final float WIDTH = 0.8f;
-  private static final float HEIGHT = 1.6f;
+  private static final float HEIGHT = 1.0f;
   private static final float LENGTH = 1.4f;
   private static final float STEP_HEIGHT = 0.6f;
   private static final float FEET_EPS = 0.001f;
@@ -28,11 +28,6 @@ public class EntityPig extends Entity {
 
   public EntityPig(float x, float y, float z) {
     pos.set(x, y, z);
-  }
-
-  private boolean canStepTo(World world, float x, float y, float z) {
-    //TODO build this fucker
-    return canStepTo(world, x, y, z);
   }
 
   private boolean resolveCollisions(World world) {
@@ -283,8 +278,8 @@ public class EntityPig extends Entity {
 
     //body
     VoxelRender.drawEntityBoxShader(
-      0.0f, 0.9f, 0.0f,
-      1.0f, 1.6f, 2.0f,
+      0.0f, 0.75f, 0.0f,
+      1.0f, 1.4f, 2.0f,
       pink,
       entityModel
     );
@@ -306,14 +301,16 @@ public class EntityPig extends Entity {
     );
 
     //legs
-    float lx0 = 0.15f, lx1= 0.35f;
-    float rx0 = 0.55f, rx1 = 0.90f;
+    float lx0 = 0.15f, lx1= 0.45f;
+    float rx0 = 0.55f, rx1 = 0.85f;
 
     float frontZ0 = 0.10f, frontZ1 = 0.35f;
     float backZ0 = 1.65f, backZ1 = 1.90f;
 
-    float y0 = 0.2f;
-    float y1 = 1.4f;
+    float hipY = 0.90f;
+    float legLen = 0.75f;
+    float y1 = hipY;
+    float y0 = hipY - legLen;
 
     float moveSq = vel.x * vel.x + vel.z * vel.z;
     float swingMul = (moveSq > 0.001f) ? 1.0f : 0.0f;
@@ -323,7 +320,7 @@ public class EntityPig extends Entity {
 
     //Front left
     float hipLX0 = (lx0 + lx1) * 0.5f;
-    float hipLY0 = y1;
+    float hipLY0 = hipY;
     float hipLZ0 = (frontZ0 + frontZ1) * 0.5f;
     Matrix4f leftLeg0 = withPivotRotationX(entityModel, hipLX0, hipLY0, hipLZ0, leftAngle);
 
@@ -336,7 +333,7 @@ public class EntityPig extends Entity {
 
     //front right
     float hipRX0 = (rx0 + rx1) * 0.5f;
-    float hipRY0 = y1;
+    float hipRY0 = hipY;
     float hipRZ0 = (frontZ0 + frontZ1) * 0.5f;
     Matrix4f rightLeg0 = withPivotRotationX(entityModel, hipRX0, hipRY0, hipRZ0, rightAngle);
 
@@ -349,26 +346,26 @@ public class EntityPig extends Entity {
 
     //back left
     float hipLX1 = (lx0 + lx1) * 0.5f;
-    float hipLY1 = y1;
+    float hipLY1 = hipY;
     float hipLZ1 = (backZ0 + backZ1) * 0.5f;
     Matrix4f leftLeg1 = withPivotRotationX(entityModel, hipLX1, hipLY1, hipLZ1, leftAngle);
 
     VoxelRender.drawEntityBoxShader(
-      lx0 + 0.05f, y0 - 0.2f, backZ0,
-      lx1 + 0.05f, y1 - 0.6f, backZ1,
+      lx0 + 0.05f, y0, backZ0,
+      lx1 + 0.05f, y1, backZ1,
       leg,
       leftLeg1
     );
 
     //back right
     float hipRX1 = (rx0 + rx1) * 0.5f;
-    float hipRY1 = y1;
+    float hipRY1 = hipY;
     float hipRZ1 = (backZ0 + backZ1) * 0.5f;
     Matrix4f rightLeg1 = withPivotRotationX(entityModel, hipRX1, hipRY1, hipRZ1, rightAngle);
 
     VoxelRender.drawEntityBoxShader(
-      rx0 + 0.30f, y0 - 0.2f, backZ0,
-      rx1 - 0.30f, y1 - 0.6f, backZ1,
+      rx0 + 0.30f, y0, backZ0,
+      rx1 - 0.30f, y1, backZ1,
       leg,
       rightLeg1
     );
