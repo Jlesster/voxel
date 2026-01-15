@@ -1,7 +1,6 @@
 package com.jless.voxel;
 
-import static org.lwjgl.opengl.GL11.*;
-
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class EntityPig extends Entity {
@@ -272,19 +271,11 @@ public class EntityPig extends Entity {
 
   @Override
   public void render(VoxelRender render) {
-    glPushMatrix();
-    glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(yawDeg, 0f, 1f, 0f);
-    glTranslatef(-0.5f, 0.0f, -0.7f);
-
-    glScalef(0.7f, 0.7f, 0.7f);
-
-    glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-    glDisable(GL_LIGHTING);
+    Matrix4f entityModel = new Matrix4f()
+      .translate(pos.x, pos.y, pos.z)
+      .rotateY((float)Math.toRadians(yawDeg))
+      .translate(-0.5f, 0.0f, -0.7f)
+      .scale(0.7f);
 
     float swing = (float) ((float)Math.sin(animTime) * 0.15);
 
@@ -293,24 +284,27 @@ public class EntityPig extends Entity {
     float[] leg = new float[]{0.9f, 0.5f, 0.7f};
 
     //body
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.0f, 0.9f, 0.0f,
       1.0f, 1.6f, 2.0f,
-      pink
+      pink,
+      entityModel
     );
 
     //head
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.05f, 1.05f, -0.85f,
       0.95f, 1.75f, 0.05f,
-      pink
+      pink,
+      entityModel
     );
 
     //snout
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       0.20f, 1.20f, -1.15f,
       0.80f, 1.50f, -0.80f,
-      pinkDark
+      pinkDark,
+      entityModel
     );
 
     //legs
@@ -324,35 +318,36 @@ public class EntityPig extends Entity {
     float y1 = 1.4f;
 
     //Front left
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       lx0, y0 - swing, frontZ0,
       lx1, y1 - swing, frontZ1,
-      leg
+      leg,
+      entityModel
     );
 
     //front right
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       rx0, y0 + swing, frontZ0,
       rx1, y1 + swing, frontZ1,
-      leg
+      leg,
+      entityModel
     );
 
     //back left
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       lx0, y0 + swing, backZ0,
       lx1, y1 + swing, backZ1,
-      leg
+      leg,
+      entityModel
     );
 
     //back right
-    VoxelRender.drawBox(
+    VoxelRender.drawEntityBoxShader(
       rx0, y0 - swing, backZ0,
       rx1, y1 - swing, backZ1,
-      leg
+      leg,
+      entityModel
     );
-
-    glPopAttrib();
-    glPopMatrix();
   }
 
   private static float wrapAngleDeg(float a) {
