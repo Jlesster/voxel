@@ -277,8 +277,6 @@ public class EntityPig extends Entity {
       .translate(-0.5f, 0.0f, -0.7f)
       .scale(0.7f);
 
-    float swing = (float) ((float)Math.sin(animTime) * 0.15);
-
     float[] pink = new float[]{1.0f, 0.65f, 0.80f};
     float[] pinkDark = new float[]{0.95f, 0.55f, 0.75f};
     float[] leg = new float[]{0.9f, 0.5f, 0.7f};
@@ -308,45 +306,71 @@ public class EntityPig extends Entity {
     );
 
     //legs
-    float lx0 = 0.10f, lx1= 0.35f;
-    float rx0 = 0.65f, rx1 = 0.90f;
+    float lx0 = 0.15f, lx1= 0.35f;
+    float rx0 = 0.55f, rx1 = 0.90f;
 
     float frontZ0 = 0.10f, frontZ1 = 0.35f;
     float backZ0 = 1.65f, backZ1 = 1.90f;
 
-    float y0 = 0.3f;
+    float y0 = 0.2f;
     float y1 = 1.4f;
 
+    float moveSq = vel.x * vel.x + vel.z * vel.z;
+    float swingMul = (moveSq > 0.001f) ? 1.0f : 0.0f;
+    float swing = (float)Math.sin(animTime) * 0.6f * swingMul;
+    float leftAngle = swing;
+    float rightAngle = -swing;
+
     //Front left
+    float hipLX0 = (lx0 + lx1) * 0.5f;
+    float hipLY0 = y1;
+    float hipLZ0 = (frontZ0 + frontZ1) * 0.5f;
+    Matrix4f leftLeg0 = withPivotRotationX(entityModel, hipLX0, hipLY0, hipLZ0, leftAngle);
+
     VoxelRender.drawEntityBoxShader(
-      lx0, y0 - swing, frontZ0,
-      lx1, y1 - swing, frontZ1,
+      lx0, y0, frontZ0,
+      lx1, y1, frontZ1,
       leg,
-      entityModel
+      leftLeg0
     );
 
     //front right
+    float hipRX0 = (rx0 + rx1) * 0.5f;
+    float hipRY0 = y1;
+    float hipRZ0 = (frontZ0 + frontZ1) * 0.5f;
+    Matrix4f rightLeg0 = withPivotRotationX(entityModel, hipRX0, hipRY0, hipRZ0, rightAngle);
+
     VoxelRender.drawEntityBoxShader(
-      rx0, y0 + swing, frontZ0,
-      rx1, y1 + swing, frontZ1,
+      rx0, y0, frontZ0,
+      rx1, y1, frontZ1,
       leg,
-      entityModel
+      rightLeg0
     );
 
     //back left
+    float hipLX1 = (lx0 + lx1) * 0.5f;
+    float hipLY1 = y1;
+    float hipLZ1 = (backZ0 + backZ1) * 0.5f;
+    Matrix4f leftLeg1 = withPivotRotationX(entityModel, hipLX1, hipLY1, hipLZ1, leftAngle);
+
     VoxelRender.drawEntityBoxShader(
-      lx0, y0 + swing, backZ0,
-      lx1, y1 + swing, backZ1,
+      lx0 + 0.05f, y0 - 0.2f, backZ0,
+      lx1 + 0.05f, y1 - 0.6f, backZ1,
       leg,
-      entityModel
+      leftLeg1
     );
 
     //back right
+    float hipRX1 = (rx0 + rx1) * 0.5f;
+    float hipRY1 = y1;
+    float hipRZ1 = (backZ0 + backZ1) * 0.5f;
+    Matrix4f rightLeg1 = withPivotRotationX(entityModel, hipRX1, hipRY1, hipRZ1, rightAngle);
+
     VoxelRender.drawEntityBoxShader(
-      rx0, y0 - swing, backZ0,
-      rx1, y1 - swing, backZ1,
+      rx0 + 0.30f, y0 - 0.2f, backZ0,
+      rx1 - 0.30f, y1 - 0.6f, backZ1,
       leg,
-      entityModel
+      rightLeg1
     );
   }
 

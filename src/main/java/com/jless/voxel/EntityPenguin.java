@@ -272,8 +272,6 @@ public class EntityPenguin extends Entity {
         .translate(-0.5f, 0.0f, -0.7f)
         .scale(0.7f);
 
-    float swing = (float) ((float)Math.sin(animTime) * 0.15);
-
     float[] black = new float[]{0.10f, 0.10f, 0.10f};
     float[] yellow = new float[]{0.75f, 0.75f, 0.00f};
     float[] leg = new float[]{0.9f, 0.9f, 0.9f};
@@ -312,7 +310,18 @@ public class EntityPenguin extends Entity {
     float y0 = 0.3f;
     float y1 = 0.9f;
 
+    float moveSq = vel.x * vel.x + vel.z * vel.z;
+    float swingMul = (moveSq > 0.001f) ? 1.0f : 0.0f;
+    float swing = (float)Math.sin(animTime) * 0.6f * swingMul;
+    float leftAngle = swing;
+    float rightAngle = -swing;
+
     //Front left
+    float hipLX0 = (lx0 + lx1) * 0.5f;
+    float hipLY0 = y1;
+    float hipLZ0 = (frontZ0 + frontZ1) * 0.5f;
+    Matrix4f leftLeg0 = withPivotRotationX(entityModel, hipLX0, hipLY0, hipLZ0, leftAngle);
+
     VoxelRender.drawEntityBoxShader(
       lx0, y0, frontZ0,
       lx1, y1, frontZ1,
@@ -321,6 +330,11 @@ public class EntityPenguin extends Entity {
     );
 
     //front right
+    float hipRX0 = (rx0 + rx1) * 0.5f;
+    float hipRY0 = y1;
+    float hipRZ0 = (frontZ0 + frontZ1) * 0.5f;
+    Matrix4f rightLeg0 = withPivotRotationX(entityModel, hipRX0, hipRY0, hipRZ0, rightAngle);
+
     VoxelRender.drawEntityBoxShader(
       rx0, y0, frontZ0,
       rx1, y1, frontZ1,
@@ -329,19 +343,29 @@ public class EntityPenguin extends Entity {
     );
 
     //back left
+    float hipLX1 = (lx0 + lx1) * 0.5f;
+    float hipLY1 = y1;
+    float hipLZ1 = (backZ0 + backZ1) * 0.5f;
+    Matrix4f leftLeg1 = withPivotRotationX(entityModel, hipLX1, hipLY1, hipLZ1, leftAngle);
+
     VoxelRender.drawEntityBoxShader(
       lx0 + 0.05f, y0 - 0.2f, backZ0,
       lx1 + 0.05f, y1 - 0.6f, backZ1,
       yellow,
-      entityModel
+      leftLeg1
     );
 
     //back right
+    float hipRX1 = (rx0 + rx1) * 0.5f;
+    float hipRY1 = y1;
+    float hipRZ1 = (backZ0 + backZ1) * 0.5f;
+    Matrix4f rightLeg1 = withPivotRotationX(entityModel, hipRX1, hipRY1, hipRZ1, rightAngle);
+
     VoxelRender.drawEntityBoxShader(
       rx0 + 0.30f, y0 - 0.2f, backZ0,
       rx1 - 0.30f, y1 - 0.6f, backZ1,
       yellow,
-      entityModel
+      rightLeg1
     );
 
   }
